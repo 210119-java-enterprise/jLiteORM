@@ -1,0 +1,4 @@
+Project ideas
+
+-Annotation based
+-Based on Hibernate
