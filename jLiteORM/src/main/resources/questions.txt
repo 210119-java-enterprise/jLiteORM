@@ -1,0 +1,6 @@
+-How does my framework self initiate?
+
+-Do I need to deal with connections and sessions in framework
+ or can the bankingApp take care of these?
+
+-Is the entity annotation a different element type?
