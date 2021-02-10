@@ -4,23 +4,23 @@ package com.revature.reflection.testModels;
 import java.util.Objects;
 import com.revature.annotations.*;
 
-@Table("app_user")
+@Table(tableName="app_user")
 public class AppUser {
 
     //Is this field annotated 'Id' or 'GenerateValue' or plain @Column?
-    @Column
+    @Id(columnName="id")
     private int id;
 
-    @Column("username")
+    @Column(columnName="user_name")
     private String username;
 
-    @Column("password")
+    @Column(columnName="password")
     private String password;
 
-    @Column("firstName")
+    @Column(columnName="first_Name")
     private String firstName;
 
-    @Column("lastName")
+    @Column(columnName="last_Name")
     private String lastName;
 
 

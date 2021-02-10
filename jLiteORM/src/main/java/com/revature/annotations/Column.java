@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 public @interface Column {
 
     //Marks a field as a column for usage in SQL table
-    public String value() default "";
+    String columnName();
+    //public String value() default "";
 
 }

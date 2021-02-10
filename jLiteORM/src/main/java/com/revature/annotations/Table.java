@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 public @interface Table {
 
     //Marks for class for SQL table designation, same as class
-    public String value() default "";
+    String tableName();
+    //public String value() default "";
 
 
 }
