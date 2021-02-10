@@ -1,6 +1,12 @@
--How does my framework self initiate?
+-How does my framework initiate?
+will a hibernate object get created in the bankingApplication's main?
+will static blocks execute upon loading?
+How do I get the name of the class that I have annotated/am scraping
+in generic fashion, from annotations?
 
--Do I need to deal with connections and sessions in framework
- or can the bankingApp take care of these?
 
--Is the entity annotation a different element type?
+-Do I need to deal with connections and sessions in framework or handled in bankingApp?
+
+
+
+

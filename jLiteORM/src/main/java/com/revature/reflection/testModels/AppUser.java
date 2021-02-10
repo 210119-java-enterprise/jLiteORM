@@ -1,14 +1,28 @@
 package com.revature.reflection.testModels;
 
-import java.util.Objects;
 
+import java.util.Objects;
+import com.revature.annotations.*;
+
+@Table("app_user")
 public class AppUser {
 
+    //Is this field annotated 'Id' or 'GenerateValue' or plain @Column?
+    @Column
     private int id;
+
+    @Column("username")
     private String username;
+
+    @Column("password")
     private String password;
+
+    @Column("firstName")
     private String firstName;
+
+    @Column("lastName")
     private String lastName;
+
 
     public AppUser(){
         super();

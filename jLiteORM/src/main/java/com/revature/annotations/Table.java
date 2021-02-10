@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Table {
 
-    //Marks for class for SQL table designation
+    //Marks for class for SQL table designation, same as class
+    public String value() default "";
 
 
 }

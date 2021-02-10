@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GenerateValue {
 
+
     //Marks the field that has an auto-generated field "serial"
 }

@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 public @interface Id {
 
     //Marks the field that is the primary key
+    public String value() default "";
 
 
 }
