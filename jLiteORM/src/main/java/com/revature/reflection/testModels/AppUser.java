@@ -7,8 +7,9 @@ import com.revature.annotations.*;
 @Table(tableName="app_user")
 public class AppUser {
 
-    //Is this field annotated 'Id' or 'GenerateValue' or plain @Column?
-    @Id(columnName="id")
+    //Column is also part of a composite primary key in user_checking_accounts
+    @JoinColumn(columnName = "user_id")
+    @Id(columnName="user_id")
     private int id;
 
     @Column(columnName="user_name")

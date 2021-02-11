@@ -1,10 +1,21 @@
 package com.revature.reflection.testModels;
 
+import com.revature.annotations.Column;
+import com.revature.annotations.Id;
+import com.revature.annotations.JoinColumn;
+import com.revature.annotations.Table;
+
 import java.util.Objects;
 
+@Table(tableName = "checking_accounts")
 public class CheckingAccount {
 
+    //Column is also part of a composite primary key in user_checking_accounts
+    @JoinColumn(columnName = "checking_id")
+    @Id(columnName = "checking_id")
     private int id;
+
+    @Column(columnName = "balance")
     private double balance;
 
 

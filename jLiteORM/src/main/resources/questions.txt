@@ -1,18 +1,21 @@
 How is work being divided up between Framework and bankingApp, boundary between the two?
 
-Framework(what I think it does)
+Framework
 -Scrapes the POJOs in order to create tables
--Replaces some part of the DAOs in the bankingApp with general CRUD SQL statements
+-Replaces the logic in the bankingApp DAOs with concise statements/method calls to DB
+-The above would involve moving the SQL and JDBC logic to the framework
+-Above logic would be inside the CRUD repos
 
 bankingApp
--User input and validation
--Connection and session management
+-Will do user input and validation
+-Will still initiate calls to database
+-Connection and session management?
 
 How does my framework initiate?
--will a hibernate object get created in the bankingApplication's main?
--will static blocks execute upon loading?
+-Initiates via a Configuration object creation inside bankingApp main
+-User hand inputs the annotated classes.
 
-How do I get the name of the class from annotations in generic way, can't hand input?
+
 
 
 

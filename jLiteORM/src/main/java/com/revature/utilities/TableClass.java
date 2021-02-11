@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 public class TableClass<T> {
 
     /*
-    Not a field but a Type
+    Not a field but a Type, used to get the name of the table.
      */
 
     private Class<T> clazz;

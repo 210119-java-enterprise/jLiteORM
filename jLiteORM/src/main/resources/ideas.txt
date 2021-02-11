@@ -1,21 +1,14 @@
 Project ideas
 
 -Based on Hibernate
-My structure will fewer classes.
+My structure may have fewer classes.
 
 Hibernate structure/architecture classes:
 1. Configuration object- Database connection, and class mapping setup.
--Think my bankingApp will take care of the connection.
 2. Session factory object - Allows for session object to be instantiated.
--Think my bankingApp will take care of the session.
 3. Session object - Makes physical connection to the DB.
--Think my bankingApp will take care of the connection.
 4. Transaction object - Prob won't use this.
 5. Query object - To retrieve data from the database and create objects.
 6. Criteria objects - Used to create and execute object oriented criteria queries to retrieve objects.
 
 
--Annotations based- Means creating custom annotations
--Relies on reflection API - To scrape the classes/methods/fields of application that uses my framework.
-
-- Can I reuse the connection and session classes from banking app?
