@@ -1,8 +1,10 @@
 package com.revature.entityMgmt;
 
+import com.revature.testModels.AppUser;
 import com.revature.utilities.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -67,28 +69,29 @@ public class EntityManager {
         //Requires two lists to get in string form
         List<ColumnField> columns = metamodel.getColumns();
         List<String> columnNames = new ArrayList<>();
-
         for(ColumnField cf:columns){
             columnNames.add(cf.getColumnName());
         }
 
-
-        //Print all fields with stream
+        //Print all fields
         System.out.print("Columns in the SQL table: ");
         System.out.println(columnNames.toString());
         //columnNames.forEach(System.out::println);
 
-        //Gets the primary key, serial, so not so useful
+        //Gets the primary key column
         String primaryKey = metamodel.getPrimaryKey().getName();
         System.out.println("Name of the primary key: " + primaryKey);
 
 
         /*
-        Map used for connecting wildcard location to column
+        Map used for connecting wildcard order location to column name
          */
         Map<String,Integer> wcMap  = new HashMap<String,Integer>();
-        Integer wildcarOrder = 0;//new Integer(1);
+        Integer wildcarOrder = 0;
 
+        /*
+        StringBuilder build the SQL statement
+         */
             StringBuilder sb = new StringBuilder("INSERT INTO ");
             sb.append(tableName);
             sb.append( " (");
@@ -111,6 +114,7 @@ public class EntityManager {
                 }
                 sb.append("?, ");
             }
+
             //Prints StringBuilder sql statement
             System.out.println("Generated SQL statement: "+ sb);
 
@@ -118,28 +122,11 @@ public class EntityManager {
         //Prints the column names and their wildcard order)
         System.out.println("Columns and their wildcard positions: "+wcMap.toString());
 
-        //Calling the getObjectFieldValues, currently just prints the methods
+
+        //Calling the getObjectFieldValues, method currently just prints the getter method names
         this.getObjectFieldValues(metamodel,obj);
 
-        //Trying to get values from AppUser object
 
-
-        String s = metamodel.getClassName();
-        System.out.println(s);
-        //Class<?>  aClass = metamodel.getClassName();
-
-
-//        try {
-//            Field field = aClass.getField("someField");
-//        } catch (NoSuchFieldException e) {
-//            e.printStackTrace();
-//        }
-
-        //MyObject objectInstance = new MyObject();
-
-        //Object value = field.get(objectInstance);
-
-        //field.set(objetInstance, value);
 
 
         /*
@@ -183,20 +170,53 @@ public class EntityManager {
         //Requires two lists to get in string form
         List<GetterField> m = mod.getGetters();
         List<String> methNames = new ArrayList<>();
-
         for(GetterField gf:m){
             methNames.add(gf.getMethodName());
         }
-
         //Print all fields with stream
         System.out.print("The getter methods to access object values: ");
         System.out.println(methNames.toString());
-        //methNames.forEach(System.out::println);
 
+        //Test to return the class object
+        //String s = mod.getClazz().toString();
+        //System.out.println(s);
 
+        //Object map for storing object values and the getter methods they came from
+        Map<String,Object> objVals = new HashMap<>();
 
+        //Class  aClass = AppUser.class;
+        //get method that takes a String as argument
+        Method method = null;
+        try {
+            /*
+            Generic way to pass obj and use its type also generic way to run through
+            all the get methods of the object and add their values+getter methods they came
+            from to a map
+             */
+            //Loop with all the getter method annotations
+            for(String getterName: methNames){
+                //Gets a getter method
+                method = mod.getClazz().getMethod(getterName);
 
+                try {
+                    //Invokes getter method on our user passed in object
+                    Object returnValue = method.invoke(obj);
+                    //Adds the getter value and the method it came from to our map
+                    objVals.put(getterName,returnValue);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
 
+            }
+            //method = mod.getClazz().getMethod("getUsername");
+            //method = AppUser.class.getMethod("getUsername");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println(objVals.toString());
     }
 
 

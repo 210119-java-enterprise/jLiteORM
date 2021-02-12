@@ -59,6 +59,9 @@ public class Metamodel<T> {
         return clazz.getName();
     }
 
+    //Returns the class of the metamodel for use in scraping object values
+    public Class<T> getClazz() {return clazz;}
+
     public IdField getPrimaryKey() {
 
         Field[] fields = clazz.getDeclaredFields();
