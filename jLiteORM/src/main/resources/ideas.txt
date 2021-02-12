@@ -12,3 +12,10 @@ Hibernate structure/architecture classes:
 6. Criteria objects - Used to create and execute object oriented criteria queries to retrieve objects.
 
 
+Expose to developer only - Entity manager, Session, Configuration, and maybe a transaction entity
+
+-Useful method for serial values- Is annotation present
+-Could put connection object inside a Session object
+-Should create a connection pool, rather than on demand.
+-Configuration class can build SessionFactory or EntityManager
+-Session is connection + more.  Session could wrap the connection plus something else

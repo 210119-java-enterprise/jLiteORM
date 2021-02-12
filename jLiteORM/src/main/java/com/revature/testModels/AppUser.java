@@ -1,10 +1,10 @@
-package com.revature.reflection.testModels;
+package com.revature.testModels;
 
 
 import java.util.Objects;
 import com.revature.annotations.*;
 
-@Table(tableName="app_user")
+@Table(tableName="app_users")
 public class AppUser {
 
     //Column is also part of a composite primary key in user_checking_accounts
@@ -59,6 +59,7 @@ public class AppUser {
         this.id = id;
     }
 
+    @Getter(getterName = "getUsername")
     public String getUsername() {
         return username;
     }
@@ -67,6 +68,7 @@ public class AppUser {
         this.username = username;
     }
 
+    @Getter(getterName = "getPassword")
     public String getPassword() {
         return password;
     }
@@ -75,6 +77,7 @@ public class AppUser {
         this.password = password;
     }
 
+    @Getter(getterName = "getFirstName")
     public String getFirstName() {
         return firstName;
     }
@@ -83,6 +86,7 @@ public class AppUser {
         this.firstName = firstName;
     }
 
+    @Getter(getterName = "getLastName")
     public String getLastName() {
         return lastName;
     }

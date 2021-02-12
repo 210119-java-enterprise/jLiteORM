@@ -1,51 +1,17 @@
-package com.revature.reflection;
-
-import com.revature.annotations.Column;
-import com.revature.annotations.Table;
-import com.revature.reflection.testModels.AppUser;
+package com.revature.testModels;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
 
-public class ClassInspector {
+public class ClassInspectorDemo {
 
-//    static{
-//        //How do I feed a generic or auto scrapped value into the inspect method?
-//        inspectClass(AppUser.class);
-//    }
-
-
-    public static void main(String[] args) {
-
-        //inspectClass(AppUser.class);
-
-        /*
-        Here we having to create an instance of the class to be scraped
-        in order to print the values associated with its annotations
-
-        **Need to automate make more generic**
-         */
-
-        //Class to be scraped
-        AppUser appU = new AppUser();
-
-        //Scraping the table name
-        if (appU.getClass().isAnnotationPresent(Table.class)) {
-            Table tableAnn = appU.getClass().getAnnotation(Table.class);
-            System.out.println(tableAnn);
-        }
 
     /*
-    Scraping all the fields and printing them out
+    Need to make this generic
      */
-        Field[] fields = appU.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class)) {
-                Column colAnn = field.getAnnotation(Column.class);
-                System.out.println("Field: " + field.getName());
+    public static void main(String[] args) {
 
-            }
-        }
+        inspectClass(AppUser.class);
 
     }
 
@@ -170,4 +136,6 @@ public class ClassInspector {
             System.out.println();
         }
     }
+
+
 }

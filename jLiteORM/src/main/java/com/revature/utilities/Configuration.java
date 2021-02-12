@@ -7,12 +7,13 @@ import java.util.List;
 public class Configuration {
 
     /*
-    May manage the connection to the DB inside this class and not ConnectionFactory
+    Connection to DB will be handled elsewhere, but here for now.
      */
 
     //Attempt to make connection to database inside Configuration class
     static{
-        ConnectionFactory.getInstance().getConnection();
+        //Not connecting for now
+        //ConnectionFactory.getInstance().getConnection();
     }
 
     /*

@@ -1,4 +1,4 @@
-package com.revature.reflection.testModels;
+package com.revature.testModels;
 
 import com.revature.annotations.Column;
 import com.revature.annotations.Id;

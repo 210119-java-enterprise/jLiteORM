@@ -1,12 +1,12 @@
 package com.revature.utilities;
 
-import com.revature.annotations.Column;
-import com.revature.annotations.Id;
-import com.revature.annotations.JoinColumn;
-import com.revature.annotations.Table;
+import com.revature.annotations.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,6 +27,10 @@ public class Metamodel<T> {
 
     //All the column fields from scraped class
     private List<ColumnField> columnFields;
+
+    //Need to change name
+    //All the getter methods from scraped class
+    private List<GetterField> getterFields;
 
     //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
@@ -105,6 +109,55 @@ Not exactly sure about this method signature, return type and creation of new ob
 
        return new TableClass(clazz);
 
+    }
+    /*
+    Probably a throw away method
+     */
+    //Was static and had a parameter Class<?> clazz and was void
+    public Method[] listPublicMethods() {
+        System.out.println("Listing the public methods of the class: " + clazz.getName());
+        Method[] methods = clazz.getMethods();
+
+
+        if (methods.length == 0) {
+            System.out.println("\tThere are no public methods in the class " + clazz.getName());
+        }
+        return methods;
+
+//        for (Method method : methods) {
+//            System.out.println("\tName: " + method.getName());
+//            Class<?>[] parameterTypes = method.getParameterTypes();
+//            System.out.println("\tDeclaring class: " + method.getDeclaringClass().getName());
+//            System.out.println("\tDeclared annotations: " + Arrays.toString(method.getDeclaredAnnotations()));
+//
+//            System.out.println("\tParameter count: " + parameterTypes.length);
+//            for (Parameter param : method.getParameters()) {
+//                System.out.println("\t\tParameter name: " + param.getName());
+//                System.out.println("\t\tParameter type: " + param.getType());
+//                System.out.println("\t\tParameter annotations: " + Arrays.toString(param.getAnnotations()));
+//            }
+//            System.out.println();
+//        }
+    }
+
+    /*
+    Something is wrong with this method, did it pretty late
+     */
+    public List<GetterField> getGetters() {
+
+        Method[] methods = clazz.getMethods();
+        for (Method meth : methods) {
+            Getter get = meth.getAnnotation(Getter.class);
+            if (get != null) {
+                getterFields.add(new GetterField(meth));
+            }
+        }
+
+        if (getterFields.isEmpty()) {
+            throw new RuntimeException("No columns found in: " + clazz.getName());
+        }
+
+        return getterFields;
     }
 
 
