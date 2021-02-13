@@ -29,10 +29,14 @@ public class CRUD {
         this.conn = conn;
     }
 
+    public Connection getConn() {
+        return conn;
+    }
+
     /*
-    This method needs to be majorly broken up, also the part where an object is
-    updated with the serial type user_id field does not work
-     */
+        This method needs to be majorly broken up, also the part where an object is
+        updated with the serial type user_id field does not work
+         */
     public void insert(Metamodel<?> metamodel, Object obj){
 
         /*
@@ -141,6 +145,9 @@ public class CRUD {
          */
 
         //May want to pull this connection instance from somewhere else, where it already exists
+
+        //Cannot use the existing 'conn' instance variable in this class for connection
+        //try (Connection conn = ConnectionFactory.getInstance().getConnection())
         try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
 
             String sql = sb.toString();

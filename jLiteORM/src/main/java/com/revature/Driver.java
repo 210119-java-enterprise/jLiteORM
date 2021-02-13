@@ -48,7 +48,7 @@ public class Driver {
         Session sesh = eM.getSession();
         //EntityManager class gives a new Session object which contains a Connection and an
         //EntityManager instance.  Don't do it like this:
-        // new Session(ConnectionFactory.getInstance().getConnection(), eM);
+
 
 
         /*

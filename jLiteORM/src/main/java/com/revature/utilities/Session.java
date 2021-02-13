@@ -10,6 +10,7 @@ This class is exposed to the framework user and provides them with a instance of
 which contains the metamodels relevant to their classes/objects. It also contains an instance of
 the CRUD class which provides the CRUD methods to interact with the DB.  Session itself, has
 a number of CRUD like methods that end up calling the actual CRUD methods of the CRUD class.
+Provides a connection as well!
 
  */
 
@@ -21,6 +22,7 @@ public class Session {
     public Session(Connection conn, EntityManager eM){
 
         this.entityMan = eM;
+        //Session has instance of CRUD with its own connection
         this.crud = new CRUD(conn);
     }
 
@@ -42,6 +44,7 @@ public class Session {
 
         //Call to the CRUD insert method
         crud.insert(metaModel,obj);
+
 
     }
 
