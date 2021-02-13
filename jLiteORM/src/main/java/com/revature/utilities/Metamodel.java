@@ -12,8 +12,8 @@ import java.util.List;
 
 
 /*
-Metamodel class, a generic class with all the fields and methods for scraping the
-information required to map an object to a table in SQL database
+This class is a generic class with all the fields and methods required for scraping
+information needed to map an generic object to a table in a SQL database.
  */
 
 public class Metamodel<T> {

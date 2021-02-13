@@ -6,7 +6,10 @@ import java.sql.Connection;
 import java.util.List;
 
 /*
-Save is mostly implemented and there is a rough outline for others
+This class is exposed to the framework user and provides them with a instance of EntityManager
+which contains the metamodels relevant to their classes/objects. It also contains an instance of
+the CRUD class which provides the CRUD methods to interact with the DB.  Session itself, has
+a number of CRUD like methods that end up calling the actual CRUD methods of the CRUD class.
 
  */
 
@@ -37,6 +40,7 @@ public class Session {
             throw new RuntimeException("No matching metamodel for " + obj.getClass().getName());
         }
 
+        //Call to the CRUD insert method
         crud.insert(metaModel,obj);
 
     }

@@ -15,6 +15,12 @@ import java.util.*;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.stream.Collectors.toMap;
 
+/*
+This class contains the CRUD methods that interact directly with the DB. It is not directly
+exposed to the user, but indirectly through the Session class's methods.
+
+ */
+
 public class CRUD {
 
     private Connection conn;
@@ -25,35 +31,45 @@ public class CRUD {
 
     /*
     This method needs to be majorly broken up, also the part where an object is
-    updated with the serial type user_id field does not work 
+    updated with the serial type user_id field does not work
      */
     public void insert(Metamodel<?> metamodel, Object obj){
 
-        //Gets table name from metamodel/object
+        /*
+        Gets table name from metamodel/object. Separate into diff method
+         */
         String tableName = metamodel.getTable().getTableName();
         System.out.println("Name of the SQL table: " + tableName);
 
-        //Gets a list of fields from metamodel/object
-        //Requires two lists to get in string form
+        /*
+         Gets a list of fields from metamodel/object. Requires two lists to
+         get in string form. Separate into diff method
+         */
         List<ColumnField> columns = metamodel.getColumns();
         List<String> columnNames = new ArrayList<>();
         for(ColumnField cf:columns){
             columnNames.add(cf.getColumnName());
         }
-
+        /*
+        Sorts the columns alphabetically, combine with above to diff method
+         */
         System.out.println("Before sorting: "+ columnNames);
         Collections.sort(columnNames);
         System.out.println("After sorting: "+columnNames);
 
-        //Print all fields
+        //Print all fields/columns. Part of above method
         System.out.print("Columns in the SQL table: ");
         System.out.println(columnNames.toString());
         //columnNames.forEach(System.out::println);
 
-        //Gets the primary key column
+
+        //Gets the primary key column.  Make diff method
         String primaryKey = metamodel.getPrimaryKey().getColumnName();
         System.out.println("Name of the primary key: " + primaryKey);
 
+        /*
+        Below should be its own method for StringBuilding the SQL statement
+         */
          /*
         Map used for connecting wildcard order location to column name
          */
@@ -95,6 +111,9 @@ public class CRUD {
 
 
         /*
+        Different method for getting and sorting object values
+         */
+        /*
         Calling the getObjectFieldValues, method returns a map of <String,Objects>
         contains the name of the getter method they come from and the value
          */
@@ -117,12 +136,11 @@ public class CRUD {
         Move on to integrating those values into the SQL statement
          */
 
-
         /*
-        Pasted from save() method in bankingApp. Needs to be uncommented to fully work
-        waiting on the implementation of a generic SQL insert to fully run it.
+        Try using a connection from the current Session object
          */
 
+        //May want to pull this connection instance from somewhere else, where it already exists
         try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
 
             String sql = sb.toString();
