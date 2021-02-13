@@ -39,142 +39,53 @@ public class CRUD {
          */
     public void insert(Metamodel<?> metamodel, Object obj){
 
-        /*
-        Gets table name from metamodel/object. Separate into diff method
-         */
+        //Gets table name from metamodel/object.
         String tableName = metamodel.getTable().getTableName();
         System.out.println("Name of the SQL table: " + tableName);
 
-        /*
-         Gets a list of fields from metamodel/object. Requires two lists to
-         get in string form. Separate into diff method
-         */
-        List<ColumnField> columns = metamodel.getColumns();
-        List<String> columnNames = new ArrayList<>();
-        for(ColumnField cf:columns){
-            columnNames.add(cf.getColumnName());
-        }
-        /*
-        Sorts the columns alphabetically, combine with above to diff method
-         */
-        System.out.println("Before sorting: "+ columnNames);
-        Collections.sort(columnNames);
-        System.out.println("After sorting: "+columnNames);
+        //Get columns and sorted
+        List<String> columnNames = getColumnsAsSortedStringList(metamodel);
+        System.out.println(columnNames);
 
-        //Print all fields/columns. Part of above method
-        System.out.print("Columns in the SQL table: ");
-        System.out.println(columnNames.toString());
-        //columnNames.forEach(System.out::println);
-
-
-        //Gets the primary key column.  Make diff method
+        //Gets the primary key
         String primaryKey = metamodel.getPrimaryKey().getColumnName();
         System.out.println("Name of the primary key: " + primaryKey);
 
-        /*
-        Below should be its own method for StringBuilding the SQL statement
-         */
-         /*
-        Map used for connecting wildcard order location to column name
-         */
-        Map<String,Integer> wcMap  = new HashMap<String,Integer>();
-        Integer wildcarOrder = 0;
-
-        /*
-        StringBuilder build the SQL statement
-         */
-        StringBuilder sb = new StringBuilder("INSERT INTO ");
-        sb.append(tableName);
-        sb.append( " (");
-        for (int i = 0; i < columnNames.size(); i++) {
-            if(i==columnNames.size()-1){
-                sb.append(columnNames.get(i)+")");
-                wcMap.put(columnNames.get(i), ++wildcarOrder);
-                break;
-            }
-            sb.append(columnNames.get(i)+", ");
-            wcMap.put(columnNames.get(i), ++wildcarOrder);
-        }
-        sb.append( " VALUES ");
-        sb.append("(");
-        for (int i = 0; i < columnNames.size(); i++){
-
-            if(i==columnNames.size()-1){
-                sb.append("?)");
-                break;
-            }
-            sb.append("?, ");
-        }
-
-        //Prints StringBuilder sql statement
-        System.out.println("Generated SQL statement: "+ sb);
-
-
-        //Prints the column names and their wildcard order)
-        System.out.println("Columns and their wildcard positions: "+wcMap.toString());
-
-
-        /*
-        Different method for getting and sorting object values
-         */
-        /*
-        Calling the getObjectFieldValues, method returns a map of <String,Objects>
-        contains the name of the getter method they come from and the value
-         */
-
+        //Returns map of object values and method called for retrieval
         Map<String,Object> objValues = this.getObjectFieldValues(metamodel,obj);
-
         System.out.println(objValues.toString());
+        Map<String, Object> sortedMap = this.getMapSortedByKeys(objValues);
+        System.out.println("map after sorting by keys: " + sortedMap);
 
-        Map<String, Object> sorted = objValues
-                .entrySet()
-                .stream()
-                .sorted(comparingByKey())
-                .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2, LinkedHashMap::new));
+        String sqlString = this.getSQLStatementInsert(tableName, columnNames);
+        System.out.println("SQL statemet: " + sqlString);
 
-        System.out.println("map after sorting by keys: " + sorted);
 
-        //Breaks if I change the name of the Getter annotation
-
-        /*
-        Move on to integrating those values into the SQL statement
-         */
-
-        /*
-        Try using a connection from the current Session object
-         */
-
-        //May want to pull this connection instance from somewhere else, where it already exists
-
-        //Cannot use the existing 'conn' instance variable in this class for connection
-        //try (Connection conn = ConnectionFactory.getInstance().getConnection())
+      //Cannot seem to use the existing connection that is an instance var in CRUD class
         try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            //Statement generic except takes primary key variable
+            PreparedStatement pstmt = conn.prepareStatement(sqlString, new String[] {primaryKey});
 
-            String sql = sb.toString();
+            /*
+            Key is getter method name which corresponds to column name in table.
+            Value is object's value obtained from getter method. Works because alphabetized
+            and there is a correlation between column names and the getter method names
+             */
 
-//            String sql = "INSERT INTO app_users (username, password, first_name, last_name)"+
-//                    "VALUES (?, ?, ?, ?)";
+            int wildCardSpot = 1;
+            for (Map.Entry<String, Object> entry : sortedMap.entrySet()) {
 
-            //primaryKey variable goes in the end of the statement,
-            // represents the column name of primary key
-            PreparedStatement pstmt = conn.prepareStatement(sb.toString(), new String[] {primaryKey});
-
-            //Key is column name, Value is wildcard order
-            int count = 1;
-            for (Map.Entry<String, Object> entry : sorted.entrySet()) {
-
-                pstmt.setObject(count, entry.getValue());
-                count+=1;
-
+                pstmt.setObject(wildCardSpot, entry.getValue());
+                wildCardSpot+=1;
             }
-//            pstmt.setString(1, newObj.getUsername());
-//            pstmt.setString(2, newObj.getPassword());
-//            pstmt.setString(3, newObj.getFirstName());
-//            pstmt.setString(4, newObj.getLastName());
 
             int rowsInserted = pstmt.executeUpdate();
 
-
+            /*
+            This part is used to give the id value to the user object that won't
+            have it until DB assigns it. Currently not working, need to figure out
+            how to invoke a method with parameters.
+             */
 //            if (rowsInserted != 0) {
 //                ResultSet rs = pstmt.getGeneratedKeys();
 //                while (rs.next()) {
@@ -196,7 +107,6 @@ public class CRUD {
 //                    } catch (InvocationTargetException e) {
 //                        e.printStackTrace();
 //                    }
-//
 //
 //                    //obj.setId(rs.getInt(primaryKey));
 //                }
@@ -238,6 +148,78 @@ public class CRUD {
     May need a more specific findAll() method
      */
 
+    public Map<String, Object> getMapSortedByKeys(Map<String,Object> objValues){
+
+        Map<String, Object> sorted = objValues
+                .entrySet()
+                .stream()
+                .sorted(comparingByKey())
+                .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2, LinkedHashMap::new));
+
+        return sorted;
+    }
+
+    /*
+   StringBuilder build the SQL statement
+    */
+    public String getSQLStatementInsert(String tableName, List<String> columnNames){
+
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(tableName);
+        sb.append( " (");
+        for (int i = 0; i < columnNames.size(); i++) {
+            if(i==columnNames.size()-1){
+                sb.append(columnNames.get(i)+")");
+                //wcMap.put(columnNames.get(i), ++wildcarOrder);
+                break;
+            }
+            sb.append(columnNames.get(i)+", ");
+            //wcMap.put(columnNames.get(i), ++wildcarOrder);
+        }
+        sb.append( " VALUES ");
+        sb.append("(");
+        for (int i = 0; i < columnNames.size(); i++){
+
+            if(i==columnNames.size()-1){
+                sb.append("?)");
+                break;
+            }
+            sb.append("?, ");
+        }
+
+        //Prints StringBuilder sql statement
+        System.out.println("Generated SQL statement: "+ sb);
+        return sb.toString();
+
+    }
+
+
+    public List<String> getColumnsAsSortedStringList(Metamodel<?> metamodel){
+
+        /*
+         Gets a list of fields as String and sorted from metamodel/object.
+         */
+        List<ColumnField> columns = metamodel.getColumns();
+        List<String> columnNames = new ArrayList<>();
+        for(ColumnField cf:columns){
+            columnNames.add(cf.getColumnName());
+        }
+        /*
+        Sorts the columns alphabetically, combine with above to diff method
+         */
+        System.out.println("Before sorting: "+ columnNames);
+        Collections.sort(columnNames);
+        System.out.println("After sorting: "+columnNames);
+
+        //Print all fields/columns. Part of above method
+        System.out.print("Columns in the SQL table: ");
+        System.out.println(columnNames.toString());
+        //columnNames.forEach(System.out::println);
+
+        return columnNames;
+
+
+    }
 
 
     public Map<String,Object> getObjectFieldValues(Metamodel<?> mod,Object obj){

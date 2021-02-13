@@ -59,10 +59,11 @@ public class Driver {
 
          */
         //User hand input's object through console based app
-        //AppUser user1 = new AppUser("user99","password10","Bill","Noon");
-        AppUser user2 = new AppUser("user88","password88","Mark","Johnson");
         //Then inside the RegisterScreen class we will call the Session's method
-        sesh.save(user2);
+        //AppUser user1 = new AppUser("user99","password10","Bill","Noon");
+        //AppUser user2 = new AppUser("user88","password88","Mark","Johnson");
+        AppUser user3 = new AppUser("user22","password22","A","John");
+        sesh.save(user3);
 
 
         /*
