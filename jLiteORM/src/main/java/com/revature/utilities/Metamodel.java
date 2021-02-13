@@ -32,6 +32,9 @@ public class Metamodel<T> {
     //All the getter methods from scraped class
     private List<GetterField> getterFields;
 
+    //The setId method
+    private SetterField sF;
+
     //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
 
@@ -115,9 +118,7 @@ Not exactly sure about this method signature, return type and creation of new ob
 
     }
 
-    /*
-    Something is wrong with this method, did it pretty late
-     */
+
     public List<GetterField> getGetters() {
 
         Method[] methods = clazz.getMethods();
@@ -135,6 +136,24 @@ Not exactly sure about this method signature, return type and creation of new ob
         return getterFields;
     }
 
+    public SetterField getSetter(){
 
+        Method[] methods = clazz.getMethods();
+        for (Method meth : methods) {
+
+            if(meth.isAnnotationPresent(Setter.class)){
+                Setter set = meth.getAnnotation(Setter.class);
+                //setterFields.add(new GetterField(meth));
+                if (set==null) {
+                    throw new RuntimeException("No method found in: " + clazz.getName());
+                }
+                sF = new SetterField(meth);
+                return sF;
+
+            }
+
+        }
+        return null;
+    }
 
 }

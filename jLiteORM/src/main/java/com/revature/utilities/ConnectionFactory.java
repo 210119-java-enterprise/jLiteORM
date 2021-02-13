@@ -22,7 +22,7 @@ public class ConnectionFactory {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            System.out.println("\nCould not connect to database, try again");
+            System.out.println("\nFrom here 1, could not connect to database, try again");
         }
     }
 
@@ -37,9 +37,9 @@ public class ConnectionFactory {
 
     /**
      *
-     * Establishes a connection with the DB based on our login info
+     * Establishes a connection with the DB based on our application.properties file
      */
-    public static ConnectionFactory getInstance(){ return connFactory;};
+    public static ConnectionFactory getInstance(){ return connFactory;}
 
     public Connection getConnection(){
 
@@ -53,10 +53,10 @@ public class ConnectionFactory {
                     props.getProperty("admin-ps")
             );
         } catch (SQLException throwables) {
-            System.out.println("\nCould connect to database, try again");
             throwables.printStackTrace();
-        }
+            System.out.println("\nFrom here 2, could connect to database, try again");
 
+        }
         System.out.println("Successfully connected to DB");
         return conn;
 

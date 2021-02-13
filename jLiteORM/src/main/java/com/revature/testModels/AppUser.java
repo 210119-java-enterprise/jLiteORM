@@ -12,16 +12,16 @@ public class AppUser {
     @Id(columnName="user_id")
     private int id;
 
-    @Column(columnName="user_name")
+    @Column(columnName="username")
     private String username;
 
     @Column(columnName="password")
     private String password;
 
-    @Column(columnName="first_Name")
+    @Column(columnName="first_name")
     private String firstName;
 
-    @Column(columnName="last_Name")
+    @Column(columnName="last_name")
     private String lastName;
 
 
@@ -55,9 +55,11 @@ public class AppUser {
         return id;
     }
 
+    @Setter(setterName = "setId")
     public void setId(int id) {
         this.id = id;
     }
+
 
     @Getter(getterName = "getUsername")
     public String getUsername() {
@@ -68,6 +70,7 @@ public class AppUser {
         this.username = username;
     }
 
+
     @Getter(getterName = "getPassword")
     public String getPassword() {
         return password;
@@ -77,6 +80,7 @@ public class AppUser {
         this.password = password;
     }
 
+
     @Getter(getterName = "getFirstName")
     public String getFirstName() {
         return firstName;
@@ -85,6 +89,7 @@ public class AppUser {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
+
 
     @Getter(getterName = "getLastName")
     public String getLastName() {
