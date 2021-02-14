@@ -124,3 +124,16 @@ Scraps from breaking up the CRUD insert method
         //            pstmt.setString(2, newObj.getPassword());
         //            pstmt.setString(3, newObj.getFirstName());
         //            pstmt.setString(4, newObj.getLastName());
+
+
+          //System.out.println("Name of the SQL table: " + tableName);
+          //System.out.println(columnNames);
+          //System.out.println("Name of the primary key: " + primaryKey);
+           //System.out.println(objValues.toString());
+            //System.out.println("map after sorting by keys: " + sortedMap);
+              //System.out.println("SQL statemet: " + sqlString);
+
+               System.out.println("Trying to verify that it worked");
+                                      method = metamodel.getClazz().getMethod("getId");
+                                      Object returnValue = method.invoke(obj);
+                                      System.out.println("Did it work, setting value of object: "+returnValue.toString());

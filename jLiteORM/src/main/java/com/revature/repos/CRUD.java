@@ -1,15 +1,10 @@
 package com.revature.repos;
 
-import com.revature.utilities.ColumnField;
-import com.revature.utilities.ConnectionFactory;
-import com.revature.utilities.GetterField;
-import com.revature.utilities.Metamodel;
+import com.revature.utilities.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 import static java.util.Map.Entry.comparingByKey;
@@ -18,7 +13,6 @@ import static java.util.stream.Collectors.toMap;
 /*
 This class contains the CRUD methods that interact directly with the DB. It is not directly
 exposed to the user, but indirectly through the Session class's methods.
-
  */
 
 public class CRUD {
@@ -29,125 +23,160 @@ public class CRUD {
         this.conn = conn;
     }
 
-    public Connection getConn() {
-        return conn;
-    }
 
     /*
-        This method needs to be majorly broken up, also the part where an object is
-        updated with the serial type user_id field does not work
-         */
+    Method inserts an object into the DB and also sets the objects id afterwards
+     */
     public void insert(Metamodel<?> metamodel, Object obj){
 
         //Gets table name from metamodel/object.
         String tableName = metamodel.getTable().getTableName();
-        System.out.println("Name of the SQL table: " + tableName);
-
         //Get columns and sorted
         List<String> columnNames = getColumnsAsSortedStringList(metamodel);
-        System.out.println(columnNames);
-
         //Gets the primary key
         String primaryKey = metamodel.getPrimaryKey().getColumnName();
-        System.out.println("Name of the primary key: " + primaryKey);
-
         //Returns map of object values and method called for retrieval
         Map<String,Object> objValues = this.getObjectFieldValues(metamodel,obj);
-        System.out.println(objValues.toString());
         Map<String, Object> sortedMap = this.getMapSortedByKeys(objValues);
-        System.out.println("map after sorting by keys: " + sortedMap);
-
         String sqlString = this.getSQLStatementInsert(tableName, columnNames);
-        System.out.println("SQL statemet: " + sqlString);
-
 
       //Cannot seem to use the existing connection that is an instance var in CRUD class
         try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
             //Statement generic except takes primary key variable
             PreparedStatement pstmt = conn.prepareStatement(sqlString, new String[] {primaryKey});
-
             /*
             Key is getter method name which corresponds to column name in table.
             Value is object's value obtained from getter method. Works because alphabetized
             and there is a correlation between column names and the getter method names
              */
-
             int wildCardSpot = 1;
             for (Map.Entry<String, Object> entry : sortedMap.entrySet()) {
-
                 pstmt.setObject(wildCardSpot, entry.getValue());
                 wildCardSpot+=1;
             }
 
             int rowsInserted = pstmt.executeUpdate();
-
             /*
-            This part is used to give the id value to the user object that won't
-            have it until DB assigns it. Currently not working, need to figure out
-            how to invoke a method with parameters.
+            This part is used to give the id value to the user object because it won't
+            have one until DB has assigned it.
              */
-//            if (rowsInserted != 0) {
-//                ResultSet rs = pstmt.getGeneratedKeys();
-//                while (rs.next()) {
-//                    //Need to access this through reflection
-//
-//                    Method method = null;
-//                    SetterField setF = metamodel.getSetter();
-//                    int id = rs.getInt(primaryKey);
-//
-//                    try {
-//                        method = metamodel.getClazz().getMethod(setF.getMethodName());
-//                        System.out.println("Printing out the method: " +method.toString());
-//
-//                        method.invoke(obj);
-//                    } catch (NoSuchMethodException e) {
-//                        e.printStackTrace();
-//                    } catch (IllegalAccessException e) {
-//                        e.printStackTrace();
-//                    } catch (InvocationTargetException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    //obj.setId(rs.getInt(primaryKey));
-//                }
-//            }
+            if (rowsInserted != 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                while (rs.next()) {
 
+                    SetterField m = metamodel.getSetter();
+                    String methName = m.getMethodName();
+                    Method method = null;
+                    int id = rs.getInt(primaryKey);
+
+                    try {
+                        Class[] arg = new Class[1];
+                        arg[0] = int.class;
+                        method = metamodel.getClazz().getMethod(methName,arg);
+                        method.invoke(obj,id);
+
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
         catch(SQLException e){
             System.out.println("Cannot connect to database, try again");
             e.printStackTrace();
         }
 
+    }
+
+    /*
+    Not fully implemented
+     */
+    public List<?> select (Metamodel<?> metamodel, Object obj){
+
+        List<Object> objList = new LinkedList<>();
+        //Gets the table name of passed object
+        String tableName = metamodel.getTable().getTableName();
+        //Returns StringBuilder generated SQL statement
+        String sqlString = getSQLStatementSelect(tableName);
+
+        //Should reuse connections, original was not try with resources
+        try (Connection conn = ConnectionFactory.getInstance().getConnection()){
+
+            //Generic
+            Statement stmt = conn.createStatement();
+
+            //SQL select * from passed table
+            ResultSet rs = stmt.executeQuery(sqlString);
+            //users = mapResultSet(rs);
+
+            //Added, will need to use this metaData resource
+            ResultSetMetaData md = rs.getMetaData();
+
+            //Make generic, this mapping resultSetMetaData probably requires separate method
+            /*
+            Stopping here
+             */
+            while(rs.next()) {
+                //Make generic
+                System.out.println(rs.getString(1));
+//                AppUser user = new AppUser();
+//                user.setId(rs.getInt("user_id"));
+//                user.setFirstName(rs.getString("first_name"));
+//                user.setLastName(rs.getString("last_name"));
+//                user.setUsername(rs.getString("username"));
+//                user.setPassword(rs.getString("password"));
+//                //Putting object into linked list
+//                objList.insert(user);
+            }
+
+            return objList;
+
+        } catch (SQLException e) {
+            System.out.println("Cannot connect to database, try again");
+            //e.printStackTrace();
+        }
+
+
+        return objList;
+    }
+    /*
+    Method for getting rows that only include specified columns
+    Not implemented
+     */
+    public List<?> selectSome(Metamodel<?> metamodel, Object obj, String[] theColumns){
+        System.out.println("Not implemented");
+        List<Object> objList = new LinkedList<>();
+
+
+        return objList;
 
     }
 
+    /*
+    Not implemented
+     */
     public void update(Metamodel<?> metamodel, Object objBefore, Object objAfter){
 
         System.out.println("Not implemented");
 
     }
 
+    /*
+    Not implemented
+     */
     public void delete(Metamodel<?> metamodel, Object obj){
 
         System.out.println("Not implemented");
 
-
-    }
-
-    public List<?> select (Metamodel<?> metamodel, Object obj){
-
-        System.out.println("Not implemented");
-        List<Object> objList = new LinkedList<>();
-
-
-        return objList;
     }
 
     /*
-
-    May need a more specific findAll() method
+    Helper method that returns a  sorted LinkedHashMap map using streams, used in insert() method
      */
-
     public Map<String, Object> getMapSortedByKeys(Map<String,Object> objValues){
 
         Map<String, Object> sorted = objValues
@@ -193,7 +222,22 @@ public class CRUD {
 
     }
 
+    /*
+    Creates generic select statement with passed in table name
+     */
+    public String getSQLStatementSelect(String tableName){
 
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(tableName);
+
+        //Return generic select all with passed table name
+        return sb.toString();
+
+    }
+
+    /*
+    Helper method that returns a sorted list of columns
+     */
     public List<String> getColumnsAsSortedStringList(Metamodel<?> metamodel){
 
         /*
@@ -214,42 +258,36 @@ public class CRUD {
         //Print all fields/columns. Part of above method
         System.out.print("Columns in the SQL table: ");
         System.out.println(columnNames.toString());
-        //columnNames.forEach(System.out::println);
 
         return columnNames;
 
-
     }
 
-
+    /*
+    Get the objects values and returns them in a map where the key is the getter method
+    name that returned the value and the value is the value returned from calling the getter
+    method
+     */
     public Map<String,Object> getObjectFieldValues(Metamodel<?> mod,Object obj){
 
-        //Gets a list of methods from metamodel/object
-        //Requires two lists to get in string form
+        //Gets a list of getter methods from metamodel/object
         List<GetterField> m = mod.getGetters();
         List<String> methNames = new ArrayList<>();
+        //Puts the String version of method names in array
         for(GetterField gf:m){
             methNames.add(gf.getMethodName());
         }
-        //Print all fields with stream
-        System.out.print("The getter methods to access object values: ");
-        System.out.println(methNames.toString());
 
-        //Test to return the class object
-        //String s = mod.getClazz().toString();
-        //System.out.println(s);
+        //System.out.println(methNames.toString());
 
         //Object map for storing object values and the getter methods they came from
         Map<String,Object> objVals = new HashMap<>();
 
-        //Class  aClass = AppUser.class;
-        //get method that takes a String as argument
         Method method = null;
         try {
             /*
-            Generic way to pass obj and use its type also generic way to run through
-            all the get methods of the object and add their values+getter methods they came
-            from to a map
+            Generic way to pass obj run and through all the get methods of the object
+            adding their values + the method's name the values came from into a map
              */
             //Loop with all the getter method annotations
             for(String getterName: methNames){
@@ -266,17 +304,16 @@ public class CRUD {
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
-
             }
-            //method = mod.getClazz().getMethod("getUsername");
-            //method = AppUser.class.getMethod("getUsername");
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-
+        //Printing the map for verification
         System.out.println(objVals.toString());
         return objVals;
     }
-
+    public Connection getConn() {
+        return conn;
+    }
 
 }
