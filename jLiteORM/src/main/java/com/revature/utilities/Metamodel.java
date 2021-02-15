@@ -4,9 +4,7 @@ import com.revature.annotations.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,8 +30,11 @@ public class Metamodel<T> {
     //All the getter methods from scraped class
     private List<GetterField> getterFields;
 
+    //All the setter methods from scraped class
+    private List<SetterField> setterFields;
+
     //The setId method
-    private SetterField sF;
+    private SetterIdField setterId;
 
     //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
@@ -56,6 +57,7 @@ public class Metamodel<T> {
         this.columnFields = new LinkedList<>();
         this.foreignKeyFields = new LinkedList<>();
         this.getterFields = new LinkedList<>();
+        this.setterFields = new LinkedList<>();
     }
 
     public String getClassName() {
@@ -136,22 +138,60 @@ Not exactly sure about this method signature, return type and creation of new ob
         return getterFields;
     }
 
-    public SetterField getSetter(){
+    public List<SetterField> getSetter(){
+
+        Method[] methods = clazz.getMethods();
+        for (Method meth : methods) {
+            //System.out.println(meth.toString());
+
+            if(meth.isAnnotationPresent(Setter.class)){
+                Setter set = meth.getAnnotation(Setter.class);
+                //System.out.println(set.toString());
+                setterFields.add(new SetterField(meth));
+                if (set==null) {
+                    throw new RuntimeException("No method found in: " + clazz.getName());
+                }
+            }
+
+            //System.out.println("What we are adding to the array: "+setterFields.toString());
+        }
+        return setterFields;
+    }
+
+    public SetterIdField getSetterId(){
 
         Method[] methods = clazz.getMethods();
         for (Method meth : methods) {
 
-            if(meth.isAnnotationPresent(Setter.class)){
-                Setter set = meth.getAnnotation(Setter.class);
-                //setterFields.add(new GetterField(meth));
+            if(meth.isAnnotationPresent(SetterId.class)){
+                SetterId set = meth.getAnnotation(SetterId.class);
                 if (set==null) {
                     throw new RuntimeException("No method found in: " + clazz.getName());
                 }
-                sF = new SetterField(meth);
-                return sF;
-
             }
+            return setterId;
 
+        }
+        return null;
+
+    }
+
+    /*
+    Returns column class type
+     */
+    public Class<?> getColumnClass(String column){
+        for(ColumnField cF : this.getColumns()){
+            if(cF.getColumnName().equals(column)){
+                return cF.getType();
+            }
+        }
+        if(getPrimaryKey().getColumnName().equals(column)){
+            return getPrimaryKey().getType();
+        }
+        for(ForeignKeyField fKF : getForeignKeys()){
+            if(fKF.getColumnName().equals(column)){
+                return fKF.getType();
+            }
         }
         return null;
     }

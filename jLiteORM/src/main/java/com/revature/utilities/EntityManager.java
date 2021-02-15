@@ -29,7 +29,7 @@ public class EntityManager {
 
             //Maybe a comparison that does not include package info, prob fine?
             if(metamodel.getClassName()==o.getClass().getName()){
-                System.out.println("Found matching metamodel for: "+ o.getClass().getName());
+                //System.out.println("Found matching metamodel for: "+ o.getClass().getName());
                 return metamodel;
             }
         }

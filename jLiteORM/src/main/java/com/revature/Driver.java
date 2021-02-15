@@ -4,6 +4,8 @@ import com.revature.testModels.AppUser;
 import com.revature.testModels.CheckingAccount;
 import com.revature.utilities.*;
 
+import java.util.List;
+
 /*
 In this Driver we create a Configuration object and give it annotated classes via the
 addAnnotatedClass method. Configuration object should be passed to an EntityManager. An
@@ -31,11 +33,7 @@ public class Driver {
         Once again, hand inputted bu user of framework
          */
         EntityManager eM = new EntityManager(cfg.getMetamodels());
-        /*
-        Believe this is how Session should function, check and see if you have any
-        other instance of ConnectionFactory(should not).  Instead of in CRUD class getting a new connection
-        should pull from the current Session object's connection
-         */
+        //Creating session
         Session sesh = eM.getSession();
         /*
         Example, user wants to add/register this new user to DB. He inputs object info
@@ -43,15 +41,12 @@ public class Driver {
         Methods are called in order: first through Session object, then through CRUD object.
         Simulating above:
          */
-        AppUser user4 = new AppUser("user850","password22","Nerd","Nerdson");
-        sesh.save(user4);
+        AppUser user2 = new AppUser("user2","password10","John","Johnson");
+        //Troubleshooting save/insert
+        //sesh.save(user2);
 
-        //Trting out select method
-        //sesh.findAll(user4);
-        /*
-         The Sessions class method will call to the CRUD method from inside itself
-        This step happens in the Framework, no need to simulate that call.
-        At this point the execution should be finished.
-         */
+        //List<AppUser> selectTry = (List<AppUser>) sesh.findAll(user1);
+        //selectTry.forEach(System.out::print);
+
     }
 }

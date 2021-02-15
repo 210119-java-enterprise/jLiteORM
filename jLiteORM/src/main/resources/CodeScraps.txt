@@ -137,3 +137,31 @@ Scraps from breaking up the CRUD insert method
                                       method = metamodel.getClazz().getMethod("getId");
                                       Object returnValue = method.invoke(obj);
                                       System.out.println("Did it work, setting value of object: "+returnValue.toString());
+
+
+               //Try with resources
+                       //(Connection conn = ConnectionFactory.getInstance().getConnection())
+
+                      //Should reuse connections, original was not try with resources
+                              //(Connection conn = ConnectionFactory.getInstance().getConnection())
+
+
+
+//                for(String s : rsColumns){
+//
+//                    //How to get the column's class?
+//
+//                    //Class<?> type = metamodel.findClassOfColumn(s);
+//                    //Class<?> type = Object.class;
+//
+//                    Object objectValue = rs.getObject(s);
+//
+//                    //How to get the field name of column
+//                    //String name = metamodel.findFieldNameOfColumn(s);
+//
+//                    //String methodName = name.substring(0,1).toUpperCase() + name.substring(1);
+//
+//                    //Ultimately want to do this
+//                    Method method = obj.getClass().getMethod("set" + methodName, type);
+//                    method.invoke(newObject, objectValue);
+//                }

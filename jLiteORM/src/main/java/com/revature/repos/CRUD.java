@@ -1,5 +1,7 @@
 package com.revature.repos;
 
+import com.revature.annotations.SetterId;
+import com.revature.testModels.AppUser;
 import com.revature.utilities.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -29,10 +31,17 @@ public class CRUD {
      */
     public void insert(Metamodel<?> metamodel, Object obj){
 
+        /*
+        Troubleshooting, insert is trying to assign the user_id which is serial
+        Need to prevent user_id from being added by making a more specific annotation
+         */
+
         //Gets table name from metamodel/object.
         String tableName = metamodel.getTable().getTableName();
         //Get columns and sorted
         List<String> columnNames = getColumnsAsSortedStringList(metamodel);
+        System.out.println(columnNames.size());
+        System.out.println(columnNames.size());
         //Gets the primary key
         String primaryKey = metamodel.getPrimaryKey().getColumnName();
         //Returns map of object values and method called for retrieval
@@ -40,8 +49,8 @@ public class CRUD {
         Map<String, Object> sortedMap = this.getMapSortedByKeys(objValues);
         String sqlString = this.getSQLStatementInsert(tableName, columnNames);
 
-      //Cannot seem to use the existing connection that is an instance var in CRUD class
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
+
+        try  {
             //Statement generic except takes primary key variable
             PreparedStatement pstmt = conn.prepareStatement(sqlString, new String[] {primaryKey});
             /*
@@ -51,10 +60,12 @@ public class CRUD {
              */
             int wildCardSpot = 1;
             for (Map.Entry<String, Object> entry : sortedMap.entrySet()) {
+                if(entry.getKey()=="getId"){
+                    continue;
+                }
                 pstmt.setObject(wildCardSpot, entry.getValue());
                 wildCardSpot+=1;
             }
-
             int rowsInserted = pstmt.executeUpdate();
             /*
             This part is used to give the id value to the user object because it won't
@@ -64,12 +75,16 @@ public class CRUD {
                 ResultSet rs = pstmt.getGeneratedKeys();
                 while (rs.next()) {
 
-                    SetterField m = metamodel.getSetter();
+                    SetterIdField m = metamodel.getSetterId();
                     String methName = m.getMethodName();
                     Method method = null;
                     int id = rs.getInt(primaryKey);
 
                     try {
+                        /*
+                        Need to redo this part, because I am hand inputting the arg type
+                        Should use ResultSetMetaData
+                         */
                         Class[] arg = new Class[1];
                         arg[0] = int.class;
                         method = metamodel.getClazz().getMethod(methName,arg);
@@ -93,46 +108,23 @@ public class CRUD {
     }
 
     /*
-    Not fully implemented
+    Fully implemented
      */
     public List<?> select (Metamodel<?> metamodel, Object obj){
 
+        //Holds the objects to be returned
         List<Object> objList = new LinkedList<>();
         //Gets the table name of passed object
         String tableName = metamodel.getTable().getTableName();
         //Returns StringBuilder generated SQL statement
         String sqlString = getSQLStatementSelect(tableName);
 
-        //Should reuse connections, original was not try with resources
-        try (Connection conn = ConnectionFactory.getInstance().getConnection()){
+        try {
 
-            //Generic
             Statement stmt = conn.createStatement();
-
-            //SQL select * from passed table
             ResultSet rs = stmt.executeQuery(sqlString);
-            //users = mapResultSet(rs);
-
-            //Added, will need to use this metaData resource
             ResultSetMetaData md = rs.getMetaData();
-
-            //Make generic, this mapping resultSetMetaData probably requires separate method
-            /*
-            Stopping here
-             */
-            while(rs.next()) {
-                //Make generic
-                System.out.println(rs.getString(1));
-//                AppUser user = new AppUser();
-//                user.setId(rs.getInt("user_id"));
-//                user.setFirstName(rs.getString("first_name"));
-//                user.setLastName(rs.getString("last_name"));
-//                user.setUsername(rs.getString("username"));
-//                user.setPassword(rs.getString("password"));
-//                //Putting object into linked list
-//                objList.insert(user);
-            }
-
+            objList = mapResultSet(metamodel,rs,md,obj);
             return objList;
 
         } catch (SQLException e) {
@@ -140,9 +132,10 @@ public class CRUD {
             //e.printStackTrace();
         }
 
-
         return objList;
     }
+
+
     /*
     Method for getting rows that only include specified columns
     Not implemented
@@ -151,9 +144,7 @@ public class CRUD {
         System.out.println("Not implemented");
         List<Object> objList = new LinkedList<>();
 
-
         return objList;
-
     }
 
     /*
@@ -189,7 +180,9 @@ public class CRUD {
     }
 
     /*
-   StringBuilder build the SQL statement
+   StringBuilder for the SQL insert statement
+   Currently, we are making an insert statement with too many columns, need
+   to cut this off before arrives into this method
     */
     public String getSQLStatementInsert(String tableName, List<String> columnNames){
 
@@ -197,6 +190,7 @@ public class CRUD {
         sb.append(tableName);
         sb.append( " (");
         for (int i = 0; i < columnNames.size(); i++) {
+
             if(i==columnNames.size()-1){
                 sb.append(columnNames.get(i)+")");
                 //wcMap.put(columnNames.get(i), ++wildcarOrder);
@@ -215,9 +209,6 @@ public class CRUD {
             }
             sb.append("?, ");
         }
-
-        //Prints StringBuilder sql statement
-        System.out.println("Generated SQL statement: "+ sb);
         return sb.toString();
 
     }
@@ -229,38 +220,78 @@ public class CRUD {
 
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
         sb.append(tableName);
-
-        //Return generic select all with passed table name
         return sb.toString();
-
     }
 
     /*
-    Helper method that returns a sorted list of columns
+    Helper method that returns a sorted list of columns alpha
      */
     public List<String> getColumnsAsSortedStringList(Metamodel<?> metamodel){
 
-        /*
-         Gets a list of fields as String and sorted from metamodel/object.
-         */
         List<ColumnField> columns = metamodel.getColumns();
         List<String> columnNames = new ArrayList<>();
         for(ColumnField cf:columns){
             columnNames.add(cf.getColumnName());
         }
-        /*
-        Sorts the columns alphabetically, combine with above to diff method
-         */
-        System.out.println("Before sorting: "+ columnNames);
         Collections.sort(columnNames);
-        System.out.println("After sorting: "+columnNames);
-
-        //Print all fields/columns. Part of above method
-        System.out.print("Columns in the SQL table: ");
-        System.out.println(columnNames.toString());
-
         return columnNames;
+    }
 
+       /*
+         Current approach is to get a string list of setter methods names that shares alpha order
+         with a list of columns.  Iterating between the two should sync pulling object values
+         from DB and setting object values
+         */
+
+    public List<Object> mapResultSet(Metamodel<?> metamodel, ResultSet rs, ResultSetMetaData metaData, Object obj){
+
+        List<Object> objList = new LinkedList<>();
+        //Get columns alphabetized
+        List<String> listColumnsString = getColumnsAsSortedStringList(metamodel);
+        //Get setter methods
+        List<SetterField> listSetterMethods = metamodel.getSetter();
+        List<String> listSetterMethodsString = new ArrayList<>();
+
+        //SetterFields to setter method strings
+        for(SetterField s:listSetterMethods){
+            listSetterMethodsString.add(s.getMethodName());
+        }
+
+        //Sorting to sync with columns order
+        Collections.sort(listSetterMethodsString);
+        //System.out.println("Sorted setter methods: " +listSetterMethodsString);
+        int count = 0;
+
+        try {
+            while(rs.next()) {
+                count=0;
+                Object newObject = obj.getClass().getConstructor().newInstance();
+                for(String s:listColumnsString){
+                    //System.out.println("\nColumn in for loop: "+s);
+                    Object objectValue = rs.getObject(s);
+                    //System.out.println("Object value from SQL table: "+objectValue);
+                    Class<?> type = metamodel.getColumnClass(s);
+                    //System.out.println("Column Type: "+type);
+                    //System.out.println("Setter method string name: "+listSetterMethodsString.get(count));
+                    Method method = obj.getClass().getMethod(listSetterMethodsString.get(count),type);
+                    method.invoke(newObject, objectValue);
+                    count++;
+
+                }
+                objList.add(newObject);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return objList;
     }
 
     /*
@@ -277,12 +308,8 @@ public class CRUD {
         for(GetterField gf:m){
             methNames.add(gf.getMethodName());
         }
-
-        //System.out.println(methNames.toString());
-
         //Object map for storing object values and the getter methods they came from
         Map<String,Object> objVals = new HashMap<>();
-
         Method method = null;
         try {
             /*
@@ -312,8 +339,4 @@ public class CRUD {
         System.out.println(objVals.toString());
         return objVals;
     }
-    public Connection getConn() {
-        return conn;
-    }
-
 }

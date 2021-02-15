@@ -10,7 +10,9 @@ public class AppUser {
     //Column is also part of a composite primary key in user_checking_accounts
     @JoinColumn(columnName = "user_id")
     @Id(columnName="user_id")
-    private int id;
+    @Column(columnName="user_id")
+    //Changed to userId
+    private int userId;
 
     @Column(columnName="username")
     private String username;
@@ -31,7 +33,7 @@ public class AppUser {
 
     public AppUser(AppUser copy){
 
-        this.id = copy.id;
+        this.userId = copy.userId;
         this.username = copy.username;
         this.password = copy.password;
         this.firstName = copy.firstName;
@@ -45,19 +47,20 @@ public class AppUser {
         this.lastName = lastName;
     }
 
-    public AppUser(int id, String username, String password, String firstName, String lastName) {
+    public AppUser(int userId, String username, String password, String firstName, String lastName) {
         this(username, password, firstName, lastName);
-        this.id = id;
+        this.userId = userId;
 
     }
-
-    public int getId() {
-        return id;
+    @Getter(getterName = "getUserId")
+    public int getUserId() {
+        return userId;
     }
 
-    @Setter(setterName = "setId")
-    public void setId(int id) {
-        this.id = id;
+    @Setter(setterName = "setUserId")
+    @SetterId(setterName = "setUserId")
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
 
@@ -66,6 +69,7 @@ public class AppUser {
         return username;
     }
 
+    @Setter(setterName = "setUsername")
     public void setUsername(String username) {
         this.username = username;
     }
@@ -76,6 +80,7 @@ public class AppUser {
         return password;
     }
 
+    @Setter(setterName = "setPassword")
     public void setPassword(String password) {
         this.password = password;
     }
@@ -86,6 +91,7 @@ public class AppUser {
         return firstName;
     }
 
+    @Setter(setterName = "setFirstName")
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -96,6 +102,7 @@ public class AppUser {
         return lastName;
     }
 
+    @Setter(setterName = "setLastName")
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
@@ -105,18 +112,18 @@ public class AppUser {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppUser appUser = (AppUser) o;
-        return id == appUser.id && Objects.equals(username, appUser.username) && Objects.equals(password, appUser.password) && Objects.equals(firstName, appUser.firstName) && Objects.equals(lastName, appUser.lastName);
+        return userId == appUser.userId && Objects.equals(username, appUser.username) && Objects.equals(password, appUser.password) && Objects.equals(firstName, appUser.firstName) && Objects.equals(lastName, appUser.lastName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, firstName, lastName);
+        return Objects.hash(userId, username, password, firstName, lastName);
     }
 
     @Override
     public String toString() {
         return "AppUser{" +
-                "id=" + id +
+                "userId=" + userId +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
