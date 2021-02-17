@@ -42,17 +42,16 @@ public class Driver {
         Simulating above:
          */
         //Adding simulation
-        //AppUser user2 = new AppUser("user7","password10","Man","Manners");
+        AppUser user2 = new AppUser("user12","password10","Man","Manners");
         //Troubleshooting save/insert
-       // sesh.save(user2);
+        sesh.save(user2);
 
         //Select all simulation
         //List<AppUser> selectTry = (List<AppUser>) sesh.findAll(user2);
         //selectTry.forEach(System.out::print);
 
         //Delete simulation
-        //AppUser delUser = new AppUser(6,"user6","password10","John","Johnson");
+        //AppUser delUser = new AppUser(5,"user5","password10","Man","Manner");
         //sesh.delete(delUser);
-
     }
 }

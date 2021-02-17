@@ -46,10 +46,9 @@ public class Session {
 
     }
 
-    /*
-    Given an object return all the rows from its table
-    Not fully implemented
-     */
+ /*
+ Implemented
+  */
     public List<?> findAll(Object obj){
 
 
