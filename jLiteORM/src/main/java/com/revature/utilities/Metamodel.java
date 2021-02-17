@@ -26,15 +26,22 @@ public class Metamodel<T> {
     //All the column fields from scraped class
     private List<ColumnField> columnFields;
 
-    //Need to change name
+    //All the column fields from scraped class
+    private List<ColumnInsertField> columnInsertFields;
+
     //All the getter methods from scraped class
     private List<GetterField> getterFields;
+
+    //All the getter methods from scraped class
+    private List<GetterInsertField> getterInsertFields;
 
     //All the setter methods from scraped class
     private List<SetterField> setterFields;
 
     //The setId method
     private SetterIdField setterId;
+
+    private GetterDelField getterDel;
 
     //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
@@ -58,6 +65,8 @@ public class Metamodel<T> {
         this.foreignKeyFields = new LinkedList<>();
         this.getterFields = new LinkedList<>();
         this.setterFields = new LinkedList<>();
+        this.columnInsertFields = new LinkedList<>();
+        this.getterInsertFields = new LinkedList<>();
     }
 
     public String getClassName() {
@@ -66,6 +75,10 @@ public class Metamodel<T> {
 
     //Returns the class of the metamodel for use in scraping object values
     public Class<T> getClazz() {return clazz;}
+
+    public List<ColumnInsertField> getColumnInsertFields(){
+        return columnInsertFields;
+    }
 
     public IdField getPrimaryKey() {
 
@@ -94,6 +107,25 @@ public class Metamodel<T> {
         }
 
         return columnFields;
+    }
+
+
+    public List<ColumnInsertField> getColumnsInsert() {
+
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+
+            ColumnInsert column = field.getAnnotation(ColumnInsert.class);
+            if (column != null) {
+                columnInsertFields.add(new ColumnInsertField(field));
+            }
+        }
+
+        if (columnInsertFields.isEmpty()) {
+            throw new RuntimeException("No columns found in: " + clazz.getName());
+        }
+
+        return columnInsertFields;
     }
 
     public List<ForeignKeyField> getForeignKeys() {
@@ -138,6 +170,23 @@ Not exactly sure about this method signature, return type and creation of new ob
         return getterFields;
     }
 
+    public List<GetterInsertField> getGettersInsert() {
+
+        Method[] methods = clazz.getMethods();
+
+        for (Method meth : methods) {
+
+            if(meth.isAnnotationPresent(GetterInsert.class)){
+                GetterInsert get = meth.getAnnotation(GetterInsert.class);
+                getterInsertFields.add(new GetterInsertField(meth));
+            }
+        }
+        if (getterInsertFields.isEmpty()) {
+            throw new RuntimeException("No columns found in: " + clazz.getName());
+        }
+        return getterInsertFields;
+    }
+
     public List<SetterField> getSetter(){
 
         Method[] methods = clazz.getMethods();
@@ -165,17 +214,31 @@ Not exactly sure about this method signature, return type and creation of new ob
 
             if(meth.isAnnotationPresent(SetterId.class)){
                 SetterId set = meth.getAnnotation(SetterId.class);
+                setterId = new SetterIdField(meth);
                 if (set==null) {
                     throw new RuntimeException("No method found in: " + clazz.getName());
                 }
             }
-            return setterId;
-
         }
-        return null;
-
+        return setterId;
     }
 
+    //Write this late, may need to check
+    public GetterDelField getGetterDel() {
+
+        Method[] methods = clazz.getMethods();
+        for (Method meth : methods) {
+
+            if (meth.isAnnotationPresent(GetterDel.class)) {
+                GetterDel set = meth.getAnnotation(GetterDel.class);
+                getterDel = new GetterDelField(meth);
+                if (set == null) {
+                    throw new RuntimeException("No method found in: " + clazz.getName());
+                }
+            }
+        }
+        return getterDel;
+    }
     /*
     Returns column class type
      */

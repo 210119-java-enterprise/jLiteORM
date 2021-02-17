@@ -14,15 +14,19 @@ public class AppUser {
     //Changed to userId
     private int userId;
 
+    @ColumnInsert(columnName = "username")
     @Column(columnName="username")
     private String username;
 
+    @ColumnInsert(columnName = "password")
     @Column(columnName="password")
     private String password;
 
+    @ColumnInsert(columnName = "first_name")
     @Column(columnName="first_name")
     private String firstName;
 
+    @ColumnInsert(columnName = "last_name")
     @Column(columnName="last_name")
     private String lastName;
 
@@ -50,12 +54,13 @@ public class AppUser {
     public AppUser(int userId, String username, String password, String firstName, String lastName) {
         this(username, password, firstName, lastName);
         this.userId = userId;
-
     }
+    @GetterDel(getterName = "getUserId")
     @Getter(getterName = "getUserId")
     public int getUserId() {
         return userId;
     }
+
 
     @Setter(setterName = "setUserId")
     @SetterId(setterName = "setUserId")
@@ -64,6 +69,7 @@ public class AppUser {
     }
 
 
+    @GetterInsert(getterName = "getUsername")
     @Getter(getterName = "getUsername")
     public String getUsername() {
         return username;
@@ -74,7 +80,7 @@ public class AppUser {
         this.username = username;
     }
 
-
+    @GetterInsert(getterName = "getPassword")
     @Getter(getterName = "getPassword")
     public String getPassword() {
         return password;
@@ -86,6 +92,7 @@ public class AppUser {
     }
 
 
+    @GetterInsert(getterName = "getFirstName")
     @Getter(getterName = "getFirstName")
     public String getFirstName() {
         return firstName;
@@ -96,7 +103,7 @@ public class AppUser {
         this.firstName = firstName;
     }
 
-
+    @GetterInsert(getterName = "getLastName")
     @Getter(getterName = "getLastName")
     public String getLastName() {
         return lastName;

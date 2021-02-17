@@ -41,12 +41,18 @@ public class Driver {
         Methods are called in order: first through Session object, then through CRUD object.
         Simulating above:
          */
-        AppUser user2 = new AppUser("user2","password10","John","Johnson");
+        //Adding simulation
+        //AppUser user2 = new AppUser("user7","password10","Man","Manners");
         //Troubleshooting save/insert
-        //sesh.save(user2);
+       // sesh.save(user2);
 
-        //List<AppUser> selectTry = (List<AppUser>) sesh.findAll(user1);
+        //Select all simulation
+        //List<AppUser> selectTry = (List<AppUser>) sesh.findAll(user2);
         //selectTry.forEach(System.out::print);
+
+        //Delete simulation
+        //AppUser delUser = new AppUser(6,"user6","password10","John","Johnson");
+        //sesh.delete(delUser);
 
     }
 }

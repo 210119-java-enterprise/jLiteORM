@@ -35,16 +35,14 @@ public class CRUD {
         Troubleshooting, insert is trying to assign the user_id which is serial
         Need to prevent user_id from being added by making a more specific annotation
          */
-
         //Gets table name from metamodel/object.
         String tableName = metamodel.getTable().getTableName();
         //Get columns and sorted
-        List<String> columnNames = getColumnsAsSortedStringList(metamodel);
-        System.out.println(columnNames.size());
-        System.out.println(columnNames.size());
+        List<String> columnNames = getColumnsInsertAsSortedStringList(metamodel);
         //Gets the primary key
         String primaryKey = metamodel.getPrimaryKey().getColumnName();
         //Returns map of object values and method called for retrieval
+        //Problem in getObjectFieldValues(metamodel,obj)
         Map<String,Object> objValues = this.getObjectFieldValues(metamodel,obj);
         Map<String, Object> sortedMap = this.getMapSortedByKeys(objValues);
         String sqlString = this.getSQLStatementInsert(tableName, columnNames);
@@ -60,7 +58,8 @@ public class CRUD {
              */
             int wildCardSpot = 1;
             for (Map.Entry<String, Object> entry : sortedMap.entrySet()) {
-                if(entry.getKey()=="getId"){
+                //Changed this if statement, was getId, I dont think it matters, i hope
+                if(entry.getKey()=="getUserId"){
                     continue;
                 }
                 pstmt.setObject(wildCardSpot, entry.getValue());
@@ -161,9 +160,60 @@ public class CRUD {
      */
     public void delete(Metamodel<?> metamodel, Object obj){
 
-        System.out.println("Not implemented");
+        String tableName = metamodel.getTable().getTableName();
+        String primaryKey = metamodel.getPrimaryKey().getColumnName();
+        this.getSQLStatementDelete(metamodel,tableName,obj);
+
+
+
+        System.out.println("Deleted");
+
+
+
 
     }
+
+    /*
+      Need to invoke the getUserId method on the object, this method is annotated
+      by GetterDel.  Should be able to do get most of this from previously written
+      code
+       */
+    //Should return string
+    public void getSQLStatementDelete(Metamodel<?> metamodel, String tableName, Object obj){
+
+
+
+        //delete from app_users where username ='user6'
+        String columnName = "";
+        StringBuilder sb = new StringBuilder("DELETE FROM ");
+        sb.append(tableName);
+        sb.append( " WHERE ");
+        sb.append(columnName);
+        sb.append("=");
+        sb.append("?");
+
+
+
+        Map<String,Object> m = getObjectFieldValuesAll(metamodel,obj);
+        String primaryKeyVal = "";
+        for (Map.Entry<String, Object> entry : m.entrySet()) {
+            if(entry.getKey()=="getUserId"){
+                primaryKeyVal = entry.getValue().toString();
+            }
+
+        }
+        System.out.println("Object values: "+m);
+        System.out.println("primary key: "+primaryKeyVal);
+
+
+
+
+
+
+
+
+    }
+
 
     /*
     Helper method that returns a  sorted LinkedHashMap map using streams, used in insert() method
@@ -237,6 +287,22 @@ public class CRUD {
         return columnNames;
     }
 
+    /*
+Helper method that returns a sorted list of columns alpha
+ */
+    public List<String> getColumnsInsertAsSortedStringList(Metamodel<?> metamodel){
+
+        List<ColumnInsertField> columns = metamodel.getColumnsInsert();
+        List<String> columnNames = new ArrayList<>();
+        //Change
+        for(ColumnInsertField cf:columns){
+            columnNames.add(cf.getColumnName());
+        }
+        Collections.sort(columnNames);
+        //Is this empty
+        return columnNames;
+    }
+
        /*
          Current approach is to get a string list of setter methods names that shares alpha order
          with a list of columns.  Iterating between the two should sync pulling object values
@@ -302,8 +368,53 @@ public class CRUD {
     public Map<String,Object> getObjectFieldValues(Metamodel<?> mod,Object obj){
 
         //Gets a list of getter methods from metamodel/object
+        //Think if I make a separate GetterFieldInsert
+        List<GetterInsertField> m = mod.getGettersInsert();
+        List<String> methNames = new ArrayList<>();
+
+        //Puts the String version of method names in array
+        for(GetterInsertField gf:m){
+            methNames.add(gf.getMethodName());
+        }
+        //Object map for storing object values and the getter methods they came from
+        Map<String,Object> objVals = new HashMap<>();
+        Method method = null;
+        try {
+            /*
+            Generic way to pass obj run and through all the get methods of the object
+            adding their values + the method's name the values came from into a map
+             */
+            //Loop with all the getter method annotations
+            for(String getterName: methNames){
+                //Gets a getter method
+                method = mod.getClazz().getMethod(getterName);
+
+                try {
+                    //Invokes getter method on our user passed in object
+                    Object returnValue = method.invoke(obj);
+                    //Adds the getter value and the method it came from to our map
+                    objVals.put(getterName,returnValue);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        //Printing the map for verification
+        System.out.println(objVals.toString());
+        return objVals;
+    }
+
+    public Map<String,Object> getObjectFieldValuesAll(Metamodel<?> mod,Object obj){
+
+        //Gets a list of getter methods from metamodel/object
+        //Think if I make a separate GetterFieldInsert
         List<GetterField> m = mod.getGetters();
         List<String> methNames = new ArrayList<>();
+
         //Puts the String version of method names in array
         for(GetterField gf:m){
             methNames.add(gf.getMethodName());
