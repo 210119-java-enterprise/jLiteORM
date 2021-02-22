@@ -10,6 +10,20 @@ accordingly.  The framework contains three user exposed classes: Configuration, 
 These classes must me added to your project's main method for the framework to function. The Session class
 provides the public methods for basic CRUD fuctionality. 
 
+## Configuration(Maven)
+
+Include the below dependency in your pom.xml:
+
+```xml
+
+   <dependency>
+            <groupId>com.revature</groupId>
+            <artifactId>jLiteORM</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+```
+
 ## Configuration(Annotations) 
 
 Available annotations:
