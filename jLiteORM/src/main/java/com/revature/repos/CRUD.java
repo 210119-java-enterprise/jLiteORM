@@ -7,12 +7,9 @@ import com.revature.SQLStatements.Update;
 import com.revature.annotations.Column;
 import com.revature.utilities.*;
 
-
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
-
-
 
 public class CRUD {
 
@@ -23,13 +20,12 @@ public class CRUD {
   }
 
   /**
-   *
    * @param metamodel
    * @param obj
    */
 
-  //*****Done****
-  public void insert(Metamodel<?> metamodel, Object obj){
+  // *****Done****
+  public void insert(Metamodel<?> metamodel, Object obj) {
 
     // Gets the table name of passed object through class annotation
     String tableName = metamodel.getTable().getTableName();
@@ -38,57 +34,55 @@ public class CRUD {
     Represents the information a user would hand to us to make a new table entry
      */
     ArrayList<Object> objectValues = RepoHelper.getObjectValues(obj);
-    //Get all the fields in the object for iteration purposes
+    // Get all the fields in the object for iteration purposes
     Field[] fields = obj.getClass().getDeclaredFields();
-    //List to hold all string names of columns
+    // List to hold all string names of columns
     List<String> columnNames = new ArrayList<>();
-    //Iteration over all fields
+    // Iteration over all fields
     for (Field field : fields) {
-      //Making all fields visible
+      // Making all fields visible
       field.setAccessible(true);
-      //If the field is annotated as a Column, we grab the annotation object
+      // If the field is annotated as a Column, we grab the annotation object
       Column column = field.getAnnotation(Column.class);
-      //If annotation exists for this field
+      // If annotation exists for this field
       if (column != null) {
         try {
-          //If annotation exists for this field, we add the String name of the column to running list
+          // If annotation exists for this field, we add the String name of the column to running
+          // list
           columnNames.add(field.getAnnotation(Column.class).columnName());
         } catch (Exception e) {
           e.printStackTrace();
         }
       }
     }
-    //Pass the list of String names for each assignable column to our SQL statement builder
+    // Pass the list of String names for each assignable column to our SQL statement builder
     String sql = Insert.getSQLStatementInsert(tableName, columnNames);
 
-    try{
-      //Changing to new connection each time
+    try {
+      // Changing to new connection each time
       Connection conn = ConnectionFactory.getInstance().getConnection();
-      //Pass generated SQL statement
+      // Pass generated SQL statement
       PreparedStatement pstmt = conn.prepareStatement(sql);
-      //Iterate on number of values object has to assign
-      for(int i = 0; i < objectValues.size(); i++){
+      // Iterate on number of values object has to assign
+      for (int i = 0; i < objectValues.size(); i++) {
         /*
         Assign the object value to the SQL statement wild card. Everything syncs up
         because the order was determined by iterating through fields. Indexing is 1-based
          */
         pstmt.setObject(i + 1, objectValues.get(i));
       }
-      //Once all wild cards are set with values we execute the SQL statement
+      // Once all wild cards are set with values we execute the SQL statement
       pstmt.executeUpdate();
-    }catch(SQLException e){
+    } catch (SQLException e) {
       e.printStackTrace();
     }
-
   }
 
   /**
-   *
    * @param metamodel
    * @param obj
    * @return
    */
-
   public List<?> select(Metamodel<?> metamodel, Object obj) {
 
     // Holds the objects to be returned
@@ -99,31 +93,30 @@ public class CRUD {
     String sqlString = Select.getSQLStatementSelect(tableName);
 
     try {
-      //Get a connection
+      // Get a connection
       Connection conn = ConnectionFactory.getInstance().getConnection();
       Statement stmt = conn.createStatement();
-      //Execute our select * statement
+      // Execute our select * statement
       ResultSet rs = stmt.executeQuery(sqlString);
-      //Gets metadata
+      // Gets metadata
       ResultSetMetaData md = rs.getMetaData();
       /*
       Maps all the rows from our ResultSet to individual objects using reflection and returns a list
       of value populated objects
        */
-      objList = RepoHelper.mapResultSet(rs,md,obj,metamodel);
-      //Returns a list of value populated objects
+      objList = RepoHelper.mapResultSet(rs, md, obj, metamodel);
+      // Returns a list of value populated objects
       return objList;
 
     } catch (SQLException e) {
       System.out.println("Cannot connect to database, try again");
       // e.printStackTrace();
     }
-    //Returns a list of value populated objects
+    // Returns a list of value populated objects
     return objList;
   }
 
   /**
-   *
    * @param metamodel
    * @param obj
    * @param theColumns
@@ -133,35 +126,34 @@ public class CRUD {
 
     // Gets the table name of passed object through class's Table annotation
     String tableName = metamodel.getTable().getTableName();
-    //Gets the lists of column names as Strings that were passed by the user
-    ArrayList<String> listCols = Select.selectFrom(metamodel,theColumns);
-    //Generates our SQL statement with passing table name and the user passed columns
-    String sql = Select.getSQLStatementSelectFrom(tableName,listCols);
-    //Object list to hold all the rows from our query
+    // Gets the lists of column names as Strings that were passed by the user
+    ArrayList<String> listCols = Select.selectFrom(metamodel, theColumns);
+    // Generates our SQL statement with passing table name and the user passed columns
+    String sql = Select.getSQLStatementSelectFrom(tableName, listCols);
+    // Object list to hold all the rows from our query
     List<Object> listOfObjects = new ArrayList<>();
 
-    try{
-      //Changing to new connection each time
+    try {
+      // Changing to new connection each time
       Connection conn = ConnectionFactory.getInstance().getConnection();
-      //Pass generated SQL statement
+      // Pass generated SQL statement
       PreparedStatement pstmt = conn.prepareStatement(sql);
       ResultSet rs = pstmt.executeQuery();
       ResultSetMetaData rsmd = rs.getMetaData();
-        /*
+      /*
       Maps all the rows from our ResultSet to individual objects using reflection and returns a list
       of value populated objects
        */
       listOfObjects = RepoHelper.mapResultSet(rs, rsmd, obj, metamodel);
-      //Close connection
+      // Close connection
       conn.close();
-    }catch(SQLException e){
+    } catch (SQLException e) {
       e.printStackTrace();
     }
-    //Returns a list of value populated objects
+    // Returns a list of value populated objects
     return listOfObjects;
   }
   /**
-   *
    * @param metamodel
    * @param objAfter
    * @param objBefore
@@ -170,25 +162,25 @@ public class CRUD {
 
     // Gets the table name of passed object through class's Table annotation
     String tableName = metamodel.getTable().getTableName();
-    //Gets all the columns names from the passed object
+    // Gets all the columns names from the passed object
     ArrayList<String> tableColumns = Update.getTableCols(metamodel, objAfter);
-    //Generates SQL update statement from the table name and column names
-    String sql = Update.getSQLStatementUpdate(tableName,tableColumns);
-    //System.out.println("SQL: "+sql);
-    //Returns all the object's field values as list of objects
+    // Generates SQL update statement from the table name and column names
+    String sql = Update.getSQLStatementUpdate(tableName, tableColumns);
+    // System.out.println("SQL: "+sql);
+    // Returns all the object's field values as list of objects
     ArrayList<Object> oldObjVal = RepoHelper.getObjectValues(objBefore);
     ArrayList<Object> newObjVal = RepoHelper.getObjectValues(objAfter);
 
-    //Size of either of the objects value count is fine
+    // Size of either of the objects value count is fine
     int size = oldObjVal.size();
 
-    try{
+    try {
 
       Connection conn = ConnectionFactory.getInstance().getConnection();
-      //Pass SQL statement
+      // Pass SQL statement
       PreparedStatement pstmt = conn.prepareStatement(sql);
-      //Iterate on size of number of fields contained in an object
-      for(int i = 0; i < size; i++){
+      // Iterate on size of number of fields contained in an object
+      for (int i = 0; i < size; i++) {
 
         /*
         Indexing is 1-based!  In first line below we are setting the new values
@@ -196,18 +188,17 @@ public class CRUD {
         setting the (WHERE column = wildcard values...) with the old object values.
         This allows us to update the correct entry in the table
          */
-        pstmt.setObject(i+1, newObjVal.get(i));
-        pstmt.setObject(i+size+1, oldObjVal.get(i));
+        pstmt.setObject(i + 1, newObjVal.get(i));
+        pstmt.setObject(i + size + 1, oldObjVal.get(i));
       }
-      //Execute the SQL statement
+      // Execute the SQL statement
       pstmt.executeUpdate();
 
-    }catch(SQLException e){
+    } catch (SQLException e) {
       e.printStackTrace();
     }
   }
   /**
-   *
    * @param metamodel
    * @param obj
    */
@@ -215,14 +206,14 @@ public class CRUD {
 
     // Gets the table name of passed object through class's Table annotation
     String tableName = metamodel.getTable().getTableName();
-    //Generate the SQL statement
+    // Generate the SQL statement
     String sql = Delete.getSQLStatementDelete(metamodel, tableName, obj);
-    //System.out.println(sql);
-    //Return the id value used in Where
+    // System.out.println(sql);
+    // Return the id value used in Where
     int idValue = Delete.getFieldForDelete(obj);
 
     try {
-      //Changing to new connection each time
+      // Changing to new connection each time
       Connection conn = ConnectionFactory.getInstance().getConnection();
 
       PreparedStatement pstmt = conn.prepareStatement(sql);

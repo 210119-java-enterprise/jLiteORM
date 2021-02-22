@@ -11,7 +11,5 @@ public @interface Id {
 
     //Marks the field that is the primary key
     String columnName();
-    //public String value() default "";
-
 
 }

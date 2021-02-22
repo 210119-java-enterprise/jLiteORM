@@ -11,5 +11,4 @@ public @interface PrimaryKey {
 
     String columnName();
 
-
 }

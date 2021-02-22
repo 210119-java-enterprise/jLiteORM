@@ -11,7 +11,5 @@ public @interface Table {
 
     //Marks for class for SQL table designation, same as class
     String tableName();
-    //public String value() default "";
-
 
 }
