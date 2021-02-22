@@ -65,7 +65,7 @@ public class ConnectionFactory {
             System.out.println("\nFrom here 2, could connect to database, try again");
 
         }
-        System.out.println("Successfully connected to DB");
+        //System.out.println("Successfully connected to DB");
         return conn;
 
     }
