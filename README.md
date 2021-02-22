@@ -76,10 +76,6 @@ The following public methods are available through the Session class:
 4. public void update(Object objAfter, Object objBefore)
 5. public void delete(Object obj)
 
-## Upgrades to follow
-
-1. Log4J
-2. JUnit / Mockito
 
 
 
