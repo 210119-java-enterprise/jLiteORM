@@ -7,14 +7,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-/*
-A copy of ConnectionFactory from bankingApplication, works fine.
- */
 
+/**
+ * Used for creating connections to the database.
+ */
 public class ConnectionFactory {
 
     private static ConnectionFactory connFactory = new ConnectionFactory();
     private Properties props = new Properties();
+
 
     static{
 
@@ -26,6 +27,9 @@ public class ConnectionFactory {
         }
     }
 
+    /**
+     * Loads the property file containing DB connection credentials and location.
+     */
     private ConnectionFactory(){
 
         try {
@@ -36,11 +40,15 @@ public class ConnectionFactory {
     }
 
     /**
-     *
-     * Establishes a connection with the DB based on our application.properties file
+     * Gets an instance of the class for making a DB connection.
+     * @return Returns the instance of the class.
      */
     public static ConnectionFactory getInstance(){ return connFactory;}
 
+    /**
+     * Makes a connection to the DB with the credentials inside of the application.properties file.
+     * @return
+     */
     public Connection getConnection(){
 
         Connection conn = null;

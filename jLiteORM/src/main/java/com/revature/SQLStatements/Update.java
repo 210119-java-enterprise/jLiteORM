@@ -20,10 +20,10 @@ public class Update {
 
 
     /**
-     * 
-     * @param model
-     * @param object
-     * @return
+     * For getting all the columns of a POJO.
+     * @param model For scraping the POJO.
+     * @param object The POJO to be scraped.
+     * @return Returns a list of Strings of all the column names.
      */
     public static ArrayList<String> getTableCols(Metamodel<?> model, Object object){
         // Gets the table name of passed object through class's Table annotation
@@ -59,12 +59,17 @@ public class Update {
                 }
             }
         }
-        //Don't think sorting is necessary, check if it breaks
-    //Collections.sort(tableColumns);
+
         return tableColumns;
 
     }
 
+    /**
+     * For generating the SQL update statement.
+     * @param tableName Name of table to update.
+     * @param tableColumns The specific columns that need updating.
+     * @return Returns the SQL update statement as a String.
+     */
     public static String getSQLStatementUpdate(String tableName, ArrayList<String> tableColumns){
         String updateStatement;
         //Bound based on number of columns/fields object contains

@@ -13,24 +13,29 @@ This class is a generic class with all the fields and methods required for scrap
 information needed to map an generic object to a table in a SQL database.
  */
 
+/**
+ A generic class with all the fields and methods required for scraping
+ information used to map a generic object to a table row of a SQL database.
+ * @param <T> Takes the class of the object passed.
+*/
 public class Metamodel<T> {
 
-
-    //The class we are scraping
     private Class<T> clazz;
 
-    //Primary key from class we are scraping
     private IdField primaryKeyField;
 
-    //All the column fields from scraped class
     private List<ColumnField> columnFields;
 
-    //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
 
-    //The table name of the class we are scraping, redundant?
     private TableClass<T> tclazz;
 
+    /**
+     * Used to make a metamodel of the passed annotated POJO.
+     * @param clazz The annotated POJO.
+     * @param <T> The type of the passed annotated POJO.
+     * @return Returns a Metamodel of the type that was passed.
+     */
     public static <T> Metamodel<T> of(Class<T> clazz) {
         if (clazz.getAnnotation(Table.class) == null) {
             throw new IllegalStateException("Cannot create Metamodel object! Provided class, " + clazz.getName() + "is not annotated with @Entity");
@@ -38,7 +43,10 @@ public class Metamodel<T> {
         return new Metamodel<>(clazz);
     }
 
-
+    /**
+     * Takes in annotated POJO and becomes its type.
+     * @param clazz type of annotated POJO.
+     */
     public Metamodel(Class<T> clazz) {
         this.clazz = clazz;
         this.columnFields = new LinkedList<>();
@@ -46,19 +54,33 @@ public class Metamodel<T> {
 
     }
 
+    /**
+     * Returns the class name of the annotated POJO.
+     * @return The String name of the annotated POJO.
+     */
     public String getClassName() {
         return clazz.getName();
     }
 
-    //Returns the class of the metamodel for use in scraping object values
+    /**
+     Returns the class of the metamodel for use in scraping object values
+     * @return The type
+     */
     public Class<T> getClazz() {return clazz;}
 
-
+    /**
+     * Returns the simple class name as a String.
+     * @return Returns the simple class name as a String.
+     */
     public String getSimpleClassName() {
 
         return clazz.getSimpleName();
     }
 
+    /**
+     * Returns the IdField object of a POJO if it has a field annotated with Id.
+     * @return Returns the IdField object.
+     */
     public IdField getPrimaryKey() {
 
         //Get all fields from the scraped class
@@ -76,7 +98,7 @@ public class Metamodel<T> {
         throw new RuntimeException("Did not find a field annotated with @Id in: " + clazz.getName());
     }
 
-    //*****Done*****
+
 
     /**
      * Method to get all the fields of a class that are annotated as columns
@@ -106,7 +128,10 @@ public class Metamodel<T> {
         return columnFields;
     }
 
-
+    /**
+     * Method to get all the fields of a class that are annotated as ForeignKeys.
+     * @return A list of ForeignKeyFields, objects that allows us to access info from annotation
+     */
     public List<ForeignKeyField> getForeignKeys() {
 
         //To hold list of foreign key objects
@@ -128,12 +153,19 @@ public class Metamodel<T> {
     }
 
 
+    /**
+     * Returns the class of the table.
+     * @param <T> The class of the table.
+     * @return The class of the table.
+     */
     public <T> TableClass<T> getTable(){
        return new TableClass(clazz);
     }
 
-    /*
-    Returns column class type
+    /**
+     * Gets the class of a specific column
+     * @param col String name of column.
+     * @return The class of the specified column.
      */
     public Class<?> getColumnClass(String col){
 
@@ -172,6 +204,11 @@ public class Metamodel<T> {
         return null;
     }
 
+    /**
+     * Gets String name of the field associated with a particular column.
+     * @param columnName String name of column
+     * @return String name of field.
+     */
     public String colFieldName(String columnName){
         //Iterate through a list of ColumnField objects, aka all fields annotated as columns
         for(ColumnField colF : this.getColumns()){

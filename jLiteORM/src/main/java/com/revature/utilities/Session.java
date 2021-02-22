@@ -5,18 +5,23 @@ import com.revature.repos.CRUD;
 import java.sql.Connection;
 import java.util.List;
 
-/*
-This class is exposed to the framework user and provides them with a instance of EntityManager
-which contains the metamodels relevant to their classes/objects. It also contains an instance of
-the CRUD class which provides the CRUD methods to interact with the DB.  It also provides a connection
-Session itself, has a number of CRUD like methods that end up calling the actual CRUD methods of the CRUD class.
- */
 
+/**
+ This class is exposed to the framework user and contains an instance of EntityManager
+ which contains the metamodels relevant to their POJOs. It also contains an instance of
+ the CRUD class which provides the CRUD methods to interact with the DB.  It also contains a connection.
+ Has a number of CRUD like methods that end up calling the actual CRUD methods of the CRUD class.
+ */
 public class Session {
 
     private final EntityManager entityMan;
     private final CRUD crud;
 
+    /**
+     * Two arg constructor containing a Connection instance and an EntityManager.
+     * @param conn Instance of Connection.
+     * @param eM Instance of EntityManager.
+     */
     public Session(Connection conn, EntityManager eM){
 
         this.entityMan = eM;
@@ -24,15 +29,21 @@ public class Session {
         this.crud = new CRUD(conn);
     }
 
+    /**
+     * Returns the EntityManager instance.
+     * @return EntityManager instance.
+     */
     public EntityManager getEntityMan() {
         return entityMan;
     }
 
-    /*
-        Finds if there is a matching metamodel for the passed object, if so, the
-        CRUD insert() method is called with parameters of metamodel and object
-     */
-    public void save(Object obj){
+
+  /**
+   * Finds if there is a matching metamodel for the passed object, if so, the CRUD insert() method
+   * is called with parameters of metamodel and object.
+   * @param obj The POJO.
+   */
+  public void save(Object obj) {
 
         //Checking that the object has a metamodel
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
@@ -43,9 +54,12 @@ public class Session {
         crud.insert(metaModel,obj);
     }
 
- /*
- Implemented
-  */
+    /**
+     *Finds if there is a matching metamodel for the passed object, if so, the CRUD select() method
+     * is called with parameters of metamodel and object.
+     * @param obj The POJO.
+     * @return List of objects representing all the records from a table.
+     */
     public List<?> findAll(Object obj){
 
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
@@ -53,10 +67,14 @@ public class Session {
 
     }
 
-    /*
-    Not fully implemented
-    */
-    public List<?> findSome(Object obj, String... theColumns){
+  /**
+   * Finds if there is a matching metamodel for the passed object, if so, the CRUD selectSome() method
+   * is called with parameters of metamodel and object.
+   * @param obj The POJO.
+   * @param theColumns List of String. The user specified columns they want.
+   * @return List of objects representing all the records  and specified columns from a table.
+   */
+  public List<?> findSome(Object obj, String... theColumns) {
 
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
 
@@ -64,20 +82,25 @@ public class Session {
 
     }
 
-    /*
-    Implemented
-     */
-    public void update(Object objAfter, Object objBefore){
+  /**
+   * Finds if there is a matching metamodel for the passed object, if so, the CRUD update()
+   * method is called with parameters of metamodel and object.
+   * @param objAfter Object with values of desired update.
+   * @param objBefore Object with values before update.
+   */
+  public void update(Object objAfter, Object objBefore) {
 
         Metamodel<?> metaModel = getAppropriateMetamodel(objBefore);
         crud.update(metaModel, objAfter, objBefore);
 
     }
 
-    /*
-    Implemented
-     */
-    public void delete(Object obj){
+  /**
+   * Finds if there is a matching metamodel for the passed object, if so, the CRUD delete() method
+   * is called with parameters of metamodel and object.
+   * @param obj The POJO.
+   */
+  public void delete(Object obj) {
 
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
         crud.delete(metaModel,obj);
@@ -85,9 +108,11 @@ public class Session {
     }
 
 
-    /*
-   Takes in an object from the user and returns the appropriate metamodel if it exists
-    */
+    /**
+     * Takes in a POJO from the user and returns the appropriate metamodel if it exists.
+     * @param o The POJO.
+     * @return The appropriate Metamodel.
+     */
     public Metamodel<?> getAppropriateMetamodel(Object o){
 
         for (Metamodel<?> metamodel : entityMan.getMetamodelList()) {
