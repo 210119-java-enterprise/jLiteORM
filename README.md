@@ -6,9 +6,9 @@ The framework acts as a wrapper for JDBC and facilitates persistance of user POJ
 ## Basics 
 
 The jLiteORM framework relies on annotations for integration with your project. POJOs must be annotated 
-accordingly.  The framework contains three user exposed classes: Configuration, EntityManager, and Session. 
-These classes must me added to your project's main method for the framework to function. The Session class
-provides the public methods for basic CRUD fuctionality. 
+accordingly.  For database connectivity, the user must provide a .properties file. The framework contains three 
+user exposed classes: Configuration, EntityManager, and Session. These classes must me added to your project's 
+main method for the framework to function. The Session class provides the public methods for basic CRUD fuctionality. 
 
 ## Configuration(Maven)
 
@@ -23,6 +23,13 @@ Include the below dependency in your pom.xml:
         </dependency>
 
 ```
+## Configuration(.properties file)
+
+Must include a .properties file with the following fields:
+
+1. url=Your URL
+2. admin-usr=Your username
+3. admin-ps=Your password
 
 ## Configuration(Annotations) 
 
