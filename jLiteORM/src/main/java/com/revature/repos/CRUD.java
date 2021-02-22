@@ -11,20 +11,28 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * This class contains all the CRUD methods that handle interactions between POJOs
+ * and databases.  The methods include insert, select, selectSome, update, and delete.
+ */
 public class CRUD {
 
+  //Connection for communicating with DB
   private Connection conn;
 
+  /**
+   * Requires a connection object
+   * @param conn
+   */
   public CRUD(Connection conn) {
     this.conn = conn;
   }
 
   /**
-   * @param metamodel
-   * @param obj
+   * For persisting user passed POJOs to a database.
+   * @param metamodel The instance that is used to scrape a POJO.
+   * @param obj The user passed POJO.
    */
-
-  // *****Done****
   public void insert(Metamodel<?> metamodel, Object obj) {
 
     // Gets the table name of passed object through class annotation
@@ -79,9 +87,11 @@ public class CRUD {
   }
 
   /**
-   * @param metamodel
-   * @param obj
-   * @return
+   * For getting all the rows and columns from a table that is determined
+   * by the class of POJO passed by the user.
+   * @param metamodel The instance that is used to scrape passed in POJO.
+   * @param obj The user passed POJO.
+   * @return Returns all the records from a table as a list of objects.
    */
   public List<?> select(Metamodel<?> metamodel, Object obj) {
 
@@ -117,10 +127,12 @@ public class CRUD {
   }
 
   /**
-   * @param metamodel
-   * @param obj
-   * @param theColumns
-   * @return
+   * For getting all the rows and only specified columns from a table that is determined
+   * by the class of POJO passed by the user.
+   * @param metamodel The instance that is used to scrape passed in POJO.
+   * @param obj The user passed POJO.
+   * @param theColumns A list of the desired columns from the record.
+   * @return Returns all the records from a table as a list of objects.
    */
   public List<?> selectSome(Metamodel<?> metamodel, Object obj, String[] theColumns) {
 
@@ -154,9 +166,11 @@ public class CRUD {
     return listOfObjects;
   }
   /**
-   * @param metamodel
-   * @param objAfter
-   * @param objBefore
+   * For updating a record based upon two passed objects - the first object contains the desired
+   * updated values and the second object contains the original values.
+   * @param metamodel The instance that is used to scrape passed in POJO.
+   * @param objAfter The object that contains the desired updated values.
+   * @param objBefore The object that contains the original values.
    */
   public void update(Metamodel<?> metamodel, Object objAfter, Object objBefore) {
 
@@ -199,8 +213,9 @@ public class CRUD {
     }
   }
   /**
-   * @param metamodel
-   * @param obj
+   * For deleting an entry based upon the object id of the passed object.
+   * @param metamodel The instance that is used to scrape passed in POJO.
+   * @param obj The user passed POJO.
    */
   public void delete(Metamodel<?> metamodel, Object obj) {
 

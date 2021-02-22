@@ -14,22 +14,23 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
-/*
-
+/**
+ * Contains static helper methods for CRUD activity.
  */
 public class RepoHelper {
 
-
+    /**
+     * No args constructor, all static methods.
+     */
     public RepoHelper(){
         super();
     }
 
     /**
-     *
-     * @param obj
-     * @return
+     * Used for getting all the field values from a POJO.
+     * @param obj The passed in POJO.
+     * @return Returns all the values of a passed POJO as a list of objects.
      */
-    //*****DONE*******
     public static ArrayList<Object> getObjectValues(Object obj){
 
         //List to hold all the values of a passed object
@@ -71,12 +72,12 @@ public class RepoHelper {
     }
 
     /**
-     *
-     * @param rs
-     * @param md
-     * @param obj
-     * @param metamodel
-     * @return
+     * For mapping the result set of a DB query to individual objects.
+     * @param rs The result set from the DB query.
+     * @param md The result set metadata from the DB query.
+     * @param obj The POJO that was passed by the user.
+     * @param metamodel Used for scraping the POJO.
+     * @return List of objects each object is a value-populated POJO.
      */
     public static List<Object> mapResultSet(ResultSet rs, ResultSetMetaData md, Object obj, Metamodel<?> metamodel){
         //Holds our list of objects to be returned

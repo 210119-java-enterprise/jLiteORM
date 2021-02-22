@@ -2,20 +2,22 @@ package com.revature.SQLStatements;
 
 import java.util.List;
 
-//****Done****
+/**
+ * Contains static methods for assisting in creation of SQL insert statement.
+ */
 public class Insert {
 
     public Insert(){
         super();
     }
 
- /*
-  StringBuilder for the SQL insert statement
-  Currently, we are making an insert statement with too many columns, need
-  to cut this off before arrives into this method
-   */
 
-
+    /**
+     * Method for creating the SQL insert statement.
+     * @param tableName The table to select from.
+     * @param columnNames  The columns we want to insert into.
+     * @return Returns the SQL statement.
+     */
     public static String getSQLStatementInsert(String tableName, List<String> columnNames) {
 
         StringBuilder sb = new StringBuilder("INSERT INTO ");

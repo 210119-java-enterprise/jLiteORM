@@ -4,6 +4,9 @@ import com.revature.utilities.Metamodel;
 
 import java.util.ArrayList;
 
+/**
+ * Contains static methods for assisting in creation of SQL select statement.
+ */
 public class Select {
 
     public Select(){
@@ -11,6 +14,12 @@ public class Select {
     }
 
 
+    /**
+     * For getting the specified selectFrom columns into an ArrayList of strings.
+     * @param metamodel The instance that is used to scrape a POJO.
+     * @param colNames Specified columns to be selected.
+     * @return Returns list of Strings containing selected column names.
+     */
     public static ArrayList<String> selectFrom(Metamodel<?> metamodel, String... colNames){
 
         // Gets the table name of passed object through class's Table annotation
@@ -26,7 +35,12 @@ public class Select {
         return listCols;
     }
 
-    //Renamed
+    /**
+     * Generates the select from SQL statement.
+     * @param tableName Table to select from.
+     * @param tableColumns Specified columns to select from.
+     * @return Returns the SQL statement as a String.
+     */
     public static String getSQLStatementSelectFrom(String tableName, ArrayList<String> tableColumns){
         String sql;
         //Based on user passed list of columns
@@ -55,9 +69,11 @@ public class Select {
         return sql;
     }
 
-    /*
-  Creates generic select statement with passed in table name
-   */
+    /**
+     * Generates the SQL select * statement.
+     * @param tableName Table to be selected from.
+     * @return SQL statement as a String.
+     */
     public static String getSQLStatementSelect(String tableName) {
 
         StringBuilder sb = new StringBuilder("SELECT * FROM ");

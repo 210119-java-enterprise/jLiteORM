@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Contains static methods used for assisting the generation of a SQL update statement.
+ */
 public class Update {
 
     String sqlStatementUpdate;
@@ -16,6 +19,12 @@ public class Update {
     }
 
 
+    /**
+     * 
+     * @param model
+     * @param object
+     * @return
+     */
     public static ArrayList<String> getTableCols(Metamodel<?> model, Object object){
         // Gets the table name of passed object through class's Table annotation
         String tableName = model.getTable().getTableName();

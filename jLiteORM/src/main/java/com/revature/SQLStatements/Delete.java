@@ -5,13 +5,22 @@ import com.revature.utilities.Metamodel;
 
 import java.lang.reflect.Field;
 
+/**
+ * Contains static methods that assist in the creation of a SQL Delete statement.
+ */
 public class Delete {
 
     public Delete(){
         super();
     }
 
-
+    /**
+     * Generates a SQL delete statement.
+     * @param metamodel For scraping the passed POJO.
+     * @param tableName Name of table where delete will take place.
+     * @param obj Passed POJO that represents the table where delete will happen.
+     * @return  Returns the SQL statement as a String.
+     */
     public static String getSQLStatementDelete(Metamodel<?> metamodel, String tableName, Object obj) {
         //Get all the object fields
         Field[] fields = obj.getClass().getDeclaredFields();
@@ -36,6 +45,11 @@ public class Delete {
         return sb.toString();
     }
 
+    /**
+     * Gets the primary key value of the object we are deleting
+     * @param obj The object we want to delete.
+     * @return The int value of the primary key.
+     */
     public static int getFieldForDelete(Object obj){
         //Get all fields
         Field[] fields = obj.getClass().getDeclaredFields();
