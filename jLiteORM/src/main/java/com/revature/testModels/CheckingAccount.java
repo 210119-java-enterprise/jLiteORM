@@ -1,16 +1,15 @@
 package com.revature.testModels;
 
-import com.revature.annotations.Column;
-import com.revature.annotations.Id;
-import com.revature.annotations.JoinColumn;
-import com.revature.annotations.Table;
+import com.revature.annotations.*;
 
 import java.util.Objects;
 
-@Table(tableName = "checking_accounts")
+@Table(tableName = "checking_account")
 public class CheckingAccount {
 
     //Column is also part of a composite primary key in user_checking_accounts
+    @Serial(columnName="checking_id")
+    @PrimaryKey(columnName="checking_id")
     @JoinColumn(columnName = "checking_id")
     @Id(columnName = "checking_id")
     private int id;

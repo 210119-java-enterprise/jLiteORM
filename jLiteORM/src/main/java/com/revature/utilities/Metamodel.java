@@ -3,7 +3,6 @@ package com.revature.utilities;
 import com.revature.annotations.*;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,23 +25,6 @@ public class Metamodel<T> {
     //All the column fields from scraped class
     private List<ColumnField> columnFields;
 
-    //All the column fields from scraped class
-    private List<ColumnInsertField> columnInsertFields;
-
-    //All the getter methods from scraped class
-    private List<GetterField> getterFields;
-
-    //All the getter methods from scraped class
-    private List<GetterInsertField> getterInsertFields;
-
-    //All the setter methods from scraped class
-    private List<SetterField> setterFields;
-
-    //The setId method
-    private SetterIdField setterId;
-
-    private GetterDelField getterDel;
-
     //All the foreign keys from scraped class
     private List<ForeignKeyField> foreignKeyFields;
 
@@ -56,17 +38,12 @@ public class Metamodel<T> {
         return new Metamodel<>(clazz);
     }
 
-/*
-    Is there any need to add more of the instance variables to a constructor?
- */
+
     public Metamodel(Class<T> clazz) {
         this.clazz = clazz;
         this.columnFields = new LinkedList<>();
         this.foreignKeyFields = new LinkedList<>();
-        this.getterFields = new LinkedList<>();
-        this.setterFields = new LinkedList<>();
-        this.columnInsertFields = new LinkedList<>();
-        this.getterInsertFields = new LinkedList<>();
+
     }
 
     public String getClassName() {
@@ -76,186 +53,159 @@ public class Metamodel<T> {
     //Returns the class of the metamodel for use in scraping object values
     public Class<T> getClazz() {return clazz;}
 
-    public List<ColumnInsertField> getColumnInsertFields(){
-        return columnInsertFields;
+
+    public String getSimpleClassName() {
+
+        return clazz.getSimpleName();
     }
 
     public IdField getPrimaryKey() {
 
+        //Get all fields from the scraped class
         Field[] fields = clazz.getDeclaredFields();
+        //Iterate through all fields
         for (Field field : fields) {
+            //If the field is annotated as a primary key grab it
             Id primaryKey = field.getAnnotation(Id.class);
+            //If it exists
             if (primaryKey != null) {
+                //Return it as IdField which has helpful methods
                 return new IdField(field);
             }
         }
         throw new RuntimeException("Did not find a field annotated with @Id in: " + clazz.getName());
     }
 
+    //*****Done*****
+
+    /**
+     * Method to get all the fields of a class that are annotated as columns
+     * @return a list of ColumnFields, object that allows us to access info from annotation
+     */
     public List<ColumnField> getColumns() {
 
+        //Gets all the declared fields from the class the metamodel is scraping
         Field[] fields = clazz.getDeclaredFields();
+        //Iterate through the declared fields
         for (Field field : fields) {
+            //Gets the Column annotation associated with the field
             Column column = field.getAnnotation(Column.class);
+            //If the field is annotated by Column
             if (column != null) {
+                //Add the field if it is annotated as a Column, added as a ColumnField object
                 columnFields.add(new ColumnField(field));
             }
         }
-
+        //After iteration, check if class has any fields that are annotated as columns
         if (columnFields.isEmpty()) {
+            //Class has no fields annotated as columns
             throw new RuntimeException("No columns found in: " + clazz.getName());
         }
 
+        //Return the list of ColumnField objects that will give us access to the String column name
         return columnFields;
     }
 
 
-    public List<ColumnInsertField> getColumnsInsert() {
-
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-
-            ColumnInsert column = field.getAnnotation(ColumnInsert.class);
-            if (column != null) {
-                columnInsertFields.add(new ColumnInsertField(field));
-            }
-        }
-
-        if (columnInsertFields.isEmpty()) {
-            throw new RuntimeException("No columns found in: " + clazz.getName());
-        }
-
-        return columnInsertFields;
-    }
-
     public List<ForeignKeyField> getForeignKeys() {
 
+        //To hold list of foreign key objects
         List<ForeignKeyField> foreignKeyFields = new ArrayList<>();
+        //Get all fields from class being scraped
         Field[] fields = clazz.getDeclaredFields();
+        //Iterate through all fields
         for (Field field : fields) {
+            //If field is annotated as a JoinColumn, grab it.
             JoinColumn column = field.getAnnotation(JoinColumn.class);
+            //If it exists
             if (column != null) {
+                //Add to running list of ForeignKeyFields objects
                 foreignKeyFields.add(new ForeignKeyField(field));
             }
         }
-
+        //Returns list of ForeignKeyFields objects
         return foreignKeyFields;
-
     }
 
-/*
-Not exactly sure about this method signature, return type and creation of new object type.
- */
+
     public <T> TableClass<T> getTable(){
-
        return new TableClass(clazz);
-
     }
 
-
-    public List<GetterField> getGetters() {
-
-        Method[] methods = clazz.getMethods();
-
-        for (Method meth : methods) {
-
-            if(meth.isAnnotationPresent(Getter.class)){
-                Getter get = meth.getAnnotation(Getter.class);
-                getterFields.add(new GetterField(meth));
-            }
-        }
-        if (getterFields.isEmpty()) {
-            throw new RuntimeException("No columns found in: " + clazz.getName());
-        }
-        return getterFields;
-    }
-
-    public List<GetterInsertField> getGettersInsert() {
-
-        Method[] methods = clazz.getMethods();
-
-        for (Method meth : methods) {
-
-            if(meth.isAnnotationPresent(GetterInsert.class)){
-                GetterInsert get = meth.getAnnotation(GetterInsert.class);
-                getterInsertFields.add(new GetterInsertField(meth));
-            }
-        }
-        if (getterInsertFields.isEmpty()) {
-            throw new RuntimeException("No columns found in: " + clazz.getName());
-        }
-        return getterInsertFields;
-    }
-
-    public List<SetterField> getSetter(){
-
-        Method[] methods = clazz.getMethods();
-        for (Method meth : methods) {
-            //System.out.println(meth.toString());
-
-            if(meth.isAnnotationPresent(Setter.class)){
-                Setter set = meth.getAnnotation(Setter.class);
-                //System.out.println(set.toString());
-                setterFields.add(new SetterField(meth));
-                if (set==null) {
-                    throw new RuntimeException("No method found in: " + clazz.getName());
-                }
-            }
-
-            //System.out.println("What we are adding to the array: "+setterFields.toString());
-        }
-        return setterFields;
-    }
-
-    public SetterIdField getSetterId(){
-
-        Method[] methods = clazz.getMethods();
-        for (Method meth : methods) {
-
-            if(meth.isAnnotationPresent(SetterId.class)){
-                SetterId set = meth.getAnnotation(SetterId.class);
-                setterId = new SetterIdField(meth);
-                if (set==null) {
-                    throw new RuntimeException("No method found in: " + clazz.getName());
-                }
-            }
-        }
-        return setterId;
-    }
-
-    //Write this late, may need to check
-    public GetterDelField getGetterDel() {
-
-        Method[] methods = clazz.getMethods();
-        for (Method meth : methods) {
-
-            if (meth.isAnnotationPresent(GetterDel.class)) {
-                GetterDel set = meth.getAnnotation(GetterDel.class);
-                getterDel = new GetterDelField(meth);
-                if (set == null) {
-                    throw new RuntimeException("No method found in: " + clazz.getName());
-                }
-            }
-        }
-        return getterDel;
-    }
     /*
     Returns column class type
      */
-    public Class<?> getColumnClass(String column){
-        for(ColumnField cF : this.getColumns()){
-            if(cF.getColumnName().equals(column)){
-                return cF.getType();
+    public Class<?> getColumnClass(String col){
+
+        //Iterate through a list of ColumnField objects, aka all fields annotated as columns
+        for(ColumnField colF : this.getColumns()){
+
+            /*
+            If the passed in string, which comes from a list of all the ResultSetMeta data columns
+            of an object as Strings, matches our list of ColumnFields(fields that are annotated as columns)
+            objects getColumnName() method. We return the type of that field.
+             */
+            if(colF.getColumnName().equals(col)){
+                //Return the type of the matched field
+                return colF.getType();
             }
         }
-        if(getPrimaryKey().getColumnName().equals(column)){
+
+        /*
+        If the passed column name represents a primary key, use its ID annotation
+        to get its column name then the IdField to get its field type. Return the type of the field
+         */
+        if(getPrimaryKey().getColumnName().equals(col)){
             return getPrimaryKey().getType();
         }
+         /*
+        If the passed column name represents a foreign key, use its ID annotation
+        to get its column name then the IdField class to get its field type. Return the type of the field
+         */
         for(ForeignKeyField fKF : getForeignKeys()){
-            if(fKF.getColumnName().equals(column)){
+            
+            if(fKF.getColumnName().equals(col)){
                 return fKF.getType();
             }
         }
+        //If no columns of any kind return null
+        return null;
+    }
+
+    public String colFieldName(String columnName){
+        //Iterate through a list of ColumnField objects, aka all fields annotated as columns
+        for(ColumnField colF : this.getColumns()){
+
+             /*
+            If the passed in string, which comes from a list of all the ResultSetMeta data columns
+            of an object as Strings, matches our list of ColumnFields(fields that are annotated as columns)
+            objects getColumnName() method. We return the name of that field.
+             */
+            if(colF.getColumnName().equals(columnName)){
+                return colF.getName();
+            }
+        }
+         /*
+        If the passed column name represents a primary key, use its ID annotation
+        to get its name of column then the IdField to get the field's name .
+         */
+        if(getPrimaryKey().getColumnName().equals(columnName)){
+            //Returns the name of the field
+            return getPrimaryKey().getName();
+        }
+
+         /*
+        If the passed column name represents a foreign key, use its ID annotation
+        to get its column name then the IdField class to get field name.
+         */
+        for(ForeignKeyField fKF : getForeignKeys()){
+
+            if(fKF.getColumnName().equals(columnName)){
+                //Return the name of the field
+                return fKF.getName();
+            }
+        }
+        //If no columns of any kind return null
         return null;
     }
 

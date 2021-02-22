@@ -8,25 +8,22 @@ import com.revature.annotations.*;
 public class AppUser {
 
     //Column is also part of a composite primary key in user_checking_accounts
+    @Serial(columnName="user_id")
+    @PrimaryKey(columnName="user_id")
     @JoinColumn(columnName = "user_id")
     @Id(columnName="user_id")
-    @Column(columnName="user_id")
-    //Changed to userId
     private int userId;
 
-    @ColumnInsert(columnName = "username")
     @Column(columnName="username")
     private String username;
 
-    @ColumnInsert(columnName = "password")
     @Column(columnName="password")
     private String password;
 
-    @ColumnInsert(columnName = "first_name")
     @Column(columnName="first_name")
     private String firstName;
 
-    @ColumnInsert(columnName = "last_name")
+
     @Column(columnName="last_name")
     private String lastName;
 
@@ -55,61 +52,43 @@ public class AppUser {
         this(username, password, firstName, lastName);
         this.userId = userId;
     }
-    @GetterDel(getterName = "getUserId")
-    @Getter(getterName = "getUserId")
+
     public int getUserId() {
         return userId;
     }
 
-
-    @Setter(setterName = "setUserId")
-    @SetterId(setterName = "setUserId")
     public void setUserId(int userId) {
         this.userId = userId;
     }
 
-
-    @GetterInsert(getterName = "getUsername")
-    @Getter(getterName = "getUsername")
     public String getUsername() {
         return username;
     }
 
-    @Setter(setterName = "setUsername")
     public void setUsername(String username) {
         this.username = username;
     }
 
-    @GetterInsert(getterName = "getPassword")
-    @Getter(getterName = "getPassword")
     public String getPassword() {
         return password;
     }
 
-    @Setter(setterName = "setPassword")
     public void setPassword(String password) {
         this.password = password;
     }
 
-
-    @GetterInsert(getterName = "getFirstName")
-    @Getter(getterName = "getFirstName")
     public String getFirstName() {
         return firstName;
     }
 
-    @Setter(setterName = "setFirstName")
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    @GetterInsert(getterName = "getLastName")
-    @Getter(getterName = "getLastName")
     public String getLastName() {
         return lastName;
     }
 
-    @Setter(setterName = "setLastName")
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }

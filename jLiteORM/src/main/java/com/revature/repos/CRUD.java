@@ -3,19 +3,16 @@ package com.revature.repos;
 import com.revature.SQLStatements.Delete;
 import com.revature.SQLStatements.Insert;
 import com.revature.SQLStatements.Select;
+import com.revature.SQLStatements.Update;
+import com.revature.annotations.Column;
 import com.revature.utilities.*;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
 
-/*
-This class contains the CRUD methods that interact directly with the DB. It is not directly
-exposed to the user, only indirectly through the Session class's methods.
- */
 
 public class CRUD {
 
@@ -25,129 +22,209 @@ public class CRUD {
     this.conn = conn;
   }
 
-  /*
-  Method inserts an object into the DB and also sets the objects id afterwards
+  /**
+   *
+   * @param metamodel
+   * @param obj
    */
-  public void insert(Metamodel<?> metamodel, Object obj) {
 
+  //*****Done****
+  public void insert(Metamodel<?> metamodel, Object obj){
 
-    // Get table name from metamodel.
+    // Gets the table name of passed object through class annotation
     String tableName = metamodel.getTable().getTableName();
-    // Get sorted columns
-    List<String> columnNames = RepoHelper.getColumnsInsertAsSortedStringList(metamodel);
-    // Get primary key
-    String primaryKey = metamodel.getPrimaryKey().getColumnName();
-    // Returns map of object values and method called for retrieval
-    Map<String, Object> objValues = RepoHelper.getObjectFieldValues(metamodel, obj);
-    Map<String, Object> sortedMap = RepoHelper.getMapSortedByKeys(objValues);
-    String sqlString = Insert.getSQLStatementInsert(tableName, columnNames);
-
-    try {
-      // Statement generic except takes primary key variable
-      PreparedStatement pstmt = conn.prepareStatement(sqlString, new String[] {primaryKey});
-      /*
-      Key is getter method name which corresponds to column name in table.
-      Value is object's value obtained from getter method. Works because alphabetized
-      and there is a correlation between column names and the getter method names
-       */
-      int wildCardSpot = 1;
-      for (Map.Entry<String, Object> entry : sortedMap.entrySet()) {
-        pstmt.setObject(wildCardSpot, entry.getValue());
-        wildCardSpot += 1;
-      }
-      int rowsInserted = pstmt.executeUpdate();
-      /*
-      This part is used to give the id value to the user object because it won't
-      have one until DB has assigned it. Could I do away with this part because in the
-      banking app, user is required to login after creating new user account???
-       */
-      if (rowsInserted != 0) {
-        ResultSet rs = pstmt.getGeneratedKeys();
-        while (rs.next()) {
-
-          SetterIdField m = metamodel.getSetterId();
-          String methName = m.getMethodName();
-          Method method = null;
-          int id = rs.getInt(primaryKey);
-
-          try {
-            Class[] arg = new Class[1];
-            arg[0] = int.class;
-            method = metamodel.getClazz().getMethod(methName, arg);
-            method.invoke(obj, id);
-
-          } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-          } catch (IllegalAccessException e) {
-            e.printStackTrace();
-          } catch (InvocationTargetException e) {
-            e.printStackTrace();
-          }
+    /*
+    Get all the values that the object holds, with the exception of serial values
+    Represents the information a user would hand to us to make a new table entry
+     */
+    ArrayList<Object> objectValues = RepoHelper.getObjectValues(obj);
+    //Get all the fields in the object for iteration purposes
+    Field[] fields = obj.getClass().getDeclaredFields();
+    //List to hold all string names of columns
+    List<String> columnNames = new ArrayList<>();
+    //Iteration over all fields
+    for (Field field : fields) {
+      //Making all fields visible
+      field.setAccessible(true);
+      //If the field is annotated as a Column, we grab the annotation object
+      Column column = field.getAnnotation(Column.class);
+      //If annotation exists for this field
+      if (column != null) {
+        try {
+          //If annotation exists for this field, we add the String name of the column to running list
+          columnNames.add(field.getAnnotation(Column.class).columnName());
+        } catch (Exception e) {
+          e.printStackTrace();
         }
       }
-    } catch (SQLException e) {
-      System.out.println("Cannot connect to database, try again");
+    }
+    //Pass the list of String names for each assignable column to our SQL statement builder
+    String sql = Insert.getSQLStatementInsert(tableName, columnNames);
+
+    try{
+      //Changing to new connection each time
+      Connection conn = ConnectionFactory.getInstance().getConnection();
+      //Pass generated SQL statement
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+      //Iterate on number of values object has to assign
+      for(int i = 0; i < objectValues.size(); i++){
+        /*
+        Assign the object value to the SQL statement wild card. Everything syncs up
+        because the order was determined by iterating through fields. Indexing is 1-based
+         */
+        pstmt.setObject(i + 1, objectValues.get(i));
+      }
+      //Once all wild cards are set with values we execute the SQL statement
+      pstmt.executeUpdate();
+    }catch(SQLException e){
       e.printStackTrace();
     }
+
   }
 
-  /*
-  Fully implemented
+  /**
+   *
+   * @param metamodel
+   * @param obj
+   * @return
    */
+
   public List<?> select(Metamodel<?> metamodel, Object obj) {
 
     // Holds the objects to be returned
     List<Object> objList = new LinkedList<>();
-    // Gets the table name of passed object
+    // Gets the table name of passed object through class annotation
     String tableName = metamodel.getTable().getTableName();
     // Returns StringBuilder generated SQL statement from Select class
     String sqlString = Select.getSQLStatementSelect(tableName);
 
     try {
-
+      //Get a connection
+      Connection conn = ConnectionFactory.getInstance().getConnection();
       Statement stmt = conn.createStatement();
+      //Execute our select * statement
       ResultSet rs = stmt.executeQuery(sqlString);
+      //Gets metadata
       ResultSetMetaData md = rs.getMetaData();
-      objList = RepoHelper.mapResultSet(metamodel, rs, md, obj);
+      /*
+      Maps all the rows from our ResultSet to individual objects using reflection and returns a list
+      of value populated objects
+       */
+      objList = RepoHelper.mapResultSet(rs,md,obj,metamodel);
+      //Returns a list of value populated objects
       return objList;
 
     } catch (SQLException e) {
       System.out.println("Cannot connect to database, try again");
       // e.printStackTrace();
     }
+    //Returns a list of value populated objects
     return objList;
   }
 
-  /*
-  Method for getting rows that only include specified columns. Not implemented
+  /**
+   *
+   * @param metamodel
+   * @param obj
+   * @param theColumns
+   * @return
    */
   public List<?> selectSome(Metamodel<?> metamodel, Object obj, String[] theColumns) {
-    System.out.println("Not implemented");
-    List<Object> objList = new LinkedList<>();
 
-    return objList;
+    // Gets the table name of passed object through class's Table annotation
+    String tableName = metamodel.getTable().getTableName();
+    //Gets the lists of column names as Strings that were passed by the user
+    ArrayList<String> listCols = Select.selectFrom(metamodel,theColumns);
+    //Generates our SQL statement with passing table name and the user passed columns
+    String sql = Select.getSQLStatementSelectFrom(tableName,listCols);
+    //Object list to hold all the rows from our query
+    List<Object> listOfObjects = new ArrayList<>();
+
+    try{
+      //Changing to new connection each time
+      Connection conn = ConnectionFactory.getInstance().getConnection();
+      //Pass generated SQL statement
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+      ResultSet rs = pstmt.executeQuery();
+      ResultSetMetaData rsmd = rs.getMetaData();
+        /*
+      Maps all the rows from our ResultSet to individual objects using reflection and returns a list
+      of value populated objects
+       */
+      listOfObjects = RepoHelper.mapResultSet(rs, rsmd, obj, metamodel);
+      //Close connection
+      conn.close();
+    }catch(SQLException e){
+      e.printStackTrace();
+    }
+    //Returns a list of value populated objects
+    return listOfObjects;
   }
-
-  /*
-  Not implemented
+  /**
+   *
+   * @param metamodel
+   * @param objAfter
+   * @param objBefore
    */
-  public void update(Metamodel<?> metamodel, Object objBefore, Object objAfter) {
+  public void update(Metamodel<?> metamodel, Object objAfter, Object objBefore) {
 
-    System.out.println("Not implemented");
+    // Gets the table name of passed object through class's Table annotation
+    String tableName = metamodel.getTable().getTableName();
+    //Gets all the columns names from the passed object
+    ArrayList<String> tableColumns = Update.getTableCols(metamodel, objAfter);
+    //Generates SQL update statement from the table name and column names
+    String sql = Update.getSQLStatementUpdate(tableName,tableColumns);
+    //System.out.println("SQL: "+sql);
+    //Returns all the object's field values as list of objects
+    ArrayList<Object> oldObjVal = RepoHelper.getObjectValues(objBefore);
+    ArrayList<Object> newObjVal = RepoHelper.getObjectValues(objAfter);
+
+    //Size of either of the objects value count is fine
+    int size = oldObjVal.size();
+
+    try{
+
+      Connection conn = ConnectionFactory.getInstance().getConnection();
+      //Pass SQL statement
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+      //Iterate on size of number of fields contained in an object
+      for(int i = 0; i < size; i++){
+
+        /*
+        Indexing is 1-based!  In first line below we are setting the new values
+        for the new object(SET column = wildcard...).  In the second line we are
+        setting the (WHERE column = wildcard values...) with the old object values.
+        This allows us to update the correct entry in the table
+         */
+        pstmt.setObject(i+1, newObjVal.get(i));
+        pstmt.setObject(i+size+1, oldObjVal.get(i));
+      }
+      //Execute the SQL statement
+      pstmt.executeUpdate();
+
+    }catch(SQLException e){
+      e.printStackTrace();
+    }
   }
-
- /*
- Implemented
-  */
+  /**
+   *
+   * @param metamodel
+   * @param obj
+   */
   public void delete(Metamodel<?> metamodel, Object obj) {
 
-
+    // Gets the table name of passed object through class's Table annotation
     String tableName = metamodel.getTable().getTableName();
+    //Generate the SQL statement
     String sql = Delete.getSQLStatementDelete(metamodel, tableName, obj);
-    System.out.println(sql);
+    //System.out.println(sql);
+    //Return the id value used in Where
     int idValue = Delete.getFieldForDelete(obj);
 
     try {
+      //Changing to new connection each time
+      Connection conn = ConnectionFactory.getInstance().getConnection();
+
       PreparedStatement pstmt = conn.prepareStatement(sql);
       pstmt.setInt(1, idValue);
       pstmt.executeUpdate();
@@ -155,5 +232,4 @@ public class CRUD {
       throwables.printStackTrace();
     }
   }
-
 }

@@ -1,5 +1,0 @@
-Left off working on the Getter annotation which has a GetterField class and the corresponding
-method needs to be implemented in the Metamodel class, the getGetter method will populate an
-array list of GetterField objects in the Metamodel class.  These should be accessible in the
-EntityManager class. I need these because I am trying to implement the SQL statement + and
-methods that follow it in a generic fashion. Specifically, the prepared statement stuff.

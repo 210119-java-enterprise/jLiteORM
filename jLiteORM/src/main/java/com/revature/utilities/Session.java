@@ -2,7 +2,6 @@ package com.revature.utilities;
 
 import com.revature.repos.CRUD;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.List;
 
@@ -40,10 +39,8 @@ public class Session {
         if(metaModel == null){
             throw new RuntimeException("No matching metamodel for " + obj.getClass().getName());
         }
-
         //Call to the CRUD insert method
         crud.insert(metaModel,obj);
-
     }
 
  /*
@@ -51,17 +48,14 @@ public class Session {
   */
     public List<?> findAll(Object obj){
 
-
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
-
         return crud.select(metaModel,obj);
 
     }
 
     /*
-Given an object and specific columns, return relevant rows
-Not fully implemented
- */
+    Not fully implemented
+    */
     public List<?> findSome(Object obj, String... theColumns){
 
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
@@ -71,36 +65,22 @@ Not fully implemented
     }
 
     /*
-    Used for fixing problems
+    Implemented
      */
-    public void troubleshooter(Object obj){
+    public void update(Object objAfter, Object objBefore){
 
-    }
-
-    /*
-    Not implemented
-     */
-    public void update(Object objBefore, Object objAfter){
-
-        System.out.println("Not fully implemented");
         Metamodel<?> metaModel = getAppropriateMetamodel(objBefore);
-
-
-        crud.update(metaModel, objBefore,objAfter);
-
+        crud.update(metaModel, objAfter, objBefore);
 
     }
 
     /*
-    Not implemented
+    Implemented
      */
     public void delete(Object obj){
 
-        System.out.println("Not fully implemented");
         Metamodel<?> metaModel = getAppropriateMetamodel(obj);
-
         crud.delete(metaModel,obj);
-
 
     }
 
@@ -112,8 +92,11 @@ Not fully implemented
 
         for (Metamodel<?> metamodel : entityMan.getMetamodelList()) {
 
-            if(metamodel.getClassName()==o.getClass().getName()){
-                System.out.println("Found matching metamodel for: "+ o.getClass().getName());
+      //System.out.println(o.getClass().getSimpleName());
+      //System.out.println(metamodel.getSimpleClassName());
+
+            if(metamodel.getSimpleClassName().equals(o.getClass().getSimpleName())){
+                //System.out.println("Found matching metamodel for: "+ o.getClass().getSimpleName());
                 return metamodel;
             }
         }

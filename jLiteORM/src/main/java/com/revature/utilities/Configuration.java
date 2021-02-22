@@ -6,15 +6,6 @@ import java.util.List;
 
 public class Configuration {
 
-    /*
-    Connection to DB will be handled elsewhere, but here for now.
-     */
-
-    //Attempt to make connection to database inside Configuration class
-    static{
-        //Not connecting for now
-        //ConnectionFactory.getInstance().getConnection();
-    }
 
     /*
     Currently not using these 3 String fields because they are pulled from application.properties

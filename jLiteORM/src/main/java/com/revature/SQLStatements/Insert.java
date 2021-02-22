@@ -1,15 +1,13 @@
 package com.revature.SQLStatements;
 
-import com.revature.utilities.Metamodel;
-
 import java.util.List;
 
+//****Done****
 public class Insert {
 
     public Insert(){
         super();
     }
-
 
  /*
   StringBuilder for the SQL insert statement
@@ -27,11 +25,9 @@ public class Insert {
 
             if (i == columnNames.size() - 1) {
                 sb.append(columnNames.get(i) + ")");
-                // wcMap.put(columnNames.get(i), ++wildcarOrder);
                 break;
             }
             sb.append(columnNames.get(i) + ", ");
-            // wcMap.put(columnNames.get(i), ++wildcarOrder);
         }
         sb.append(" VALUES ");
         sb.append("(");

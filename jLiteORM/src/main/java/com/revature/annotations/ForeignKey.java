@@ -5,10 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GetterInsert {
+@Target(ElementType.FIELD)
+public @interface ForeignKey {
 
-    String getterName();
-
+    String columnName();
 }

@@ -4,7 +4,6 @@ package com.revature.utilities;
 import com.revature.annotations.Column;
 import com.revature.annotations.Table;
 
-import java.lang.reflect.Field;
 
 public class TableClass<T> {
 

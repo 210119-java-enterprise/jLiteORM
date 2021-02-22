@@ -20,22 +20,6 @@ public class EntityManager {
         return metamodelList;
     }
 
-    /*
-    Takes in an object from the user and returns the appropriate metamodel
-     */
-    public Metamodel<?> getAppropriateMetamodel(Object o){
-
-        for (Metamodel<?> metamodel : metamodelList) {
-
-            //Maybe a comparison that does not include package info, prob fine?
-            if(metamodel.getClassName()==o.getClass().getName()){
-                //System.out.println("Found matching metamodel for: "+ o.getClass().getName());
-                return metamodel;
-            }
-        }
-        System.out.println("No match");
-        return null;
-    }
 
     /*
     Returns a Session object which contains a DB connection from ConnectionFactory
