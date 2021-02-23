@@ -7,7 +7,7 @@ The framework acts as a wrapper for JDBC and facilitates persistance of user POJ
 
 The jLiteORM framework relies on annotations for integration with your project. POJOs must be annotated 
 accordingly.  For database connectivity, the user must provide a .properties file. The framework contains three 
-user exposed classes: Configuration, EntityManager, and Session. These classes must me added to your project's 
+user exposed classes: Configuration, EntityManager, and Session. These classes must be added to your project's 
 main method for the framework to function. The Session class provides the public methods for basic CRUD fuctionality. 
 
 ## Configuration(Maven)
